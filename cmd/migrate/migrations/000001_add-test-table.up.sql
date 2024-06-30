@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS test (
+    id SERIAL PRIMARY KEY,
+    test VARCHAR(255)
+);
