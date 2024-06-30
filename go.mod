@@ -1,3 +1,3 @@
-module github.com/fly-apps/go-example
+module github.com/jamesdavidyu/neighborhost-service
 
 go 1.22
