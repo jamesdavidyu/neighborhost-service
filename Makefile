@@ -1,5 +1,5 @@
 build:
-	@go build -o bin/neighborhost-service cmd/main.go
+	@go build -o bin/neighborhost-service ./app.go
 
 test:
 	@go test -v ./...
