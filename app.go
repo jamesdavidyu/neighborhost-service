@@ -16,11 +16,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// type Test struct {
-// 	ID   int    `json:"id"`
-// 	Test string `json:"test"`
-// }
-
 //go:embed templates/*
 var resources embed.FS
 
