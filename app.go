@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"embed"
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -12,13 +11,15 @@ import (
 
 	"github.com/gorilla/mux"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/jamesdavidyu/neighborhost-service/service"
+	"github.com/jamesdavidyu/neighborhost-service/utils"
 	"github.com/joho/godotenv"
 )
 
-type Test struct {
-	ID   int    `json:"id"`
-	Test string `json:"test"`
-}
+// type Test struct {
+// 	ID   int    `json:"id"`
+// 	Test string `json:"test"`
+// }
 
 //go:embed templates/*
 var resources embed.FS
@@ -49,56 +50,56 @@ func main() {
 	}
 
 	router := mux.NewRouter()
-	router.HandleFunc("/api/v1/tests", getTests(db)).Methods("GET")
+	router.HandleFunc("/api/v1/tests", service.GetTests(db)).Methods("GET")
 
-	enhancedRouter := enableCORS(jsonContentTypeMiddleware(router))
+	enhancedRouter := utils.EnableCORS(utils.JSONContentTypeMiddleware(router))
 
 	log.Println("listening on", port)
 	log.Fatal(http.ListenAndServe(":"+port, enhancedRouter))
 }
 
-func enableCORS(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+// func enableCORS(next http.Handler) http.Handler {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		w.Header().Set("Access-Control-Allow-Origin", "*")
+// 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+// 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
+// 		if r.Method == "OPTIONS" {
+// 			w.WriteHeader(http.StatusOK)
+// 			return
+// 		}
 
-		next.ServeHTTP(w, r)
-	})
-}
+// 		next.ServeHTTP(w, r)
+// 	})
+// }
 
-func jsonContentTypeMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		next.ServeHTTP(w, r)
-	})
-}
+// func jsonContentTypeMiddleware(next http.Handler) http.Handler {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		w.Header().Set("Content-Type", "application/json")
+// 		next.ServeHTTP(w, r)
+// 	})
+// }
 
-func getTests(db *sql.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		rows, err := db.Query("SELECT * FROM test")
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer rows.Close()
+// func getTests(db *sql.DB) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		rows, err := db.Query("SELECT * FROM test")
+// 		if err != nil {
+// 			log.Fatal(err)
+// 		}
+// 		defer rows.Close()
 
-		tests := []Test{}
-		for rows.Next() {
-			var t Test
-			if err := rows.Scan(&t.ID, &t.Test); err != nil {
-				log.Fatal(err)
-			}
-			tests = append(tests, t)
-		}
-		if err := rows.Err(); err != nil {
-			log.Fatal(err)
-		}
+// 		tests := []Test{}
+// 		for rows.Next() {
+// 			var t Test
+// 			if err := rows.Scan(&t.ID, &t.Test); err != nil {
+// 				log.Fatal(err)
+// 			}
+// 			tests = append(tests, t)
+// 		}
+// 		if err := rows.Err(); err != nil {
+// 			log.Fatal(err)
+// 		}
 
-		json.NewEncoder(w).Encode(tests)
-	}
-}
+// 		json.NewEncoder(w).Encode(tests)
+// 	}
+// }
