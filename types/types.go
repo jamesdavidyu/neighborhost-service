@@ -1,6 +1,9 @@
 package types
 
-type Test struct {
-	ID   int    `json:"id"`
-	Test string `json:"test"`
+import "time"
+
+type Neighborhoods struct {
+	ID           int       `json:"id"`
+	Neighborhood string    `json:"neighborhood"`
+	CreatedAt    time.Time `json:"createdAt"`
 }

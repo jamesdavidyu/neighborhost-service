@@ -45,7 +45,7 @@ func main() {
 	}
 
 	router := mux.NewRouter()
-	router.HandleFunc("/api/v1/tests", service.GetTests(db)).Methods("GET")
+	router.HandleFunc("/api/v1/neighborhoods", service.GetNeighborhoods(db)).Methods("GET")
 
 	enhancedRouter := utils.EnableCORS(utils.JSONContentTypeMiddleware(router))
 

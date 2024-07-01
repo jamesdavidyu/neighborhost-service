@@ -9,26 +9,26 @@ import (
 	"github.com/jamesdavidyu/neighborhost-service/types"
 )
 
-func GetTests(db *sql.DB) http.HandlerFunc {
+func GetNeighborhoods(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		rows, err := db.Query("SELECT * FROM test")
+		rows, err := db.Query("SELECT * FROM neighborhoods")
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer rows.Close()
 
-		tests := []types.Test{}
+		neighborhoods := []types.Neighborhoods{}
 		for rows.Next() {
-			var t types.Test
-			if err := rows.Scan(&t.ID, &t.Test); err != nil {
+			var n types.Neighborhoods
+			if err := rows.Scan(&n.ID, &n.Neighborhood, &n.CreatedAt); err != nil {
 				log.Fatal(err)
 			}
-			tests = append(tests, t)
+			neighborhoods = append(neighborhoods, n)
 		}
 		if err := rows.Err(); err != nil {
 			log.Fatal(err)
 		}
 
-		json.NewEncoder(w).Encode(tests)
+		json.NewEncoder(w).Encode(neighborhoods)
 	}
 }
