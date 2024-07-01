@@ -1,17 +1,15 @@
 package routes
 
 import (
-	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/gorilla/mux"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/jamesdavidyu/neighborhost-service/db"
 	"github.com/jamesdavidyu/neighborhost-service/services"
 	"github.com/jamesdavidyu/neighborhost-service/utils"
-	"github.com/joho/godotenv"
 )
 
 func Routes() {
@@ -21,12 +19,9 @@ func Routes() {
 
 	}
 
-	godotenv.Load()
-
-	db, err := sql.Open("pgx", os.Getenv("DATABASE_URL"))
+	db, err := db.DB()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 
 	router := mux.NewRouter()
