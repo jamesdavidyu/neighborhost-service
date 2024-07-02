@@ -3,6 +3,7 @@ package services
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -30,5 +31,20 @@ func GetNeighborhoods(db *sql.DB) http.HandlerFunc {
 		}
 
 		json.NewEncoder(w).Encode(neighborhoods)
+	}
+}
+
+func CreateNeighborhood(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var n types.Neighborhoods
+		json.NewDecoder(r.Body).Decode(&n)
+
+		_, err := db.Exec(`INSERT INTO neighborhoods (neighborhood)
+							VALUES ($1)`, n.Neighborhood)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		json.NewEncoder(w).Encode(n)
 	}
 }

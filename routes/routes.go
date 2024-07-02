@@ -29,6 +29,7 @@ func Routes() {
 	routePrefix := "/api/v1"
 	router.HandleFunc(routePrefix+"/status", GetStatus()).Methods("GET")
 	router.HandleFunc(routePrefix+"/neighborhoods", services.GetNeighborhoods(db)).Methods("GET")
+	router.HandleFunc(routePrefix+"/neighborhoods", services.CreateNeighborhood(db)).Methods("POST")
 
 	enhancedRouter := utils.EnableCORS(utils.JSONContentTypeMiddleware(router))
 
