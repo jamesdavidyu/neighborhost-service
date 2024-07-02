@@ -1,4 +1,4 @@
-package services
+package controllers
 
 import (
 	"database/sql"
@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jamesdavidyu/neighborhost-service/types"
+	"github.com/jamesdavidyu/neighborhost-service/cmd/model/types"
 )
 
 func GetNeighborhoods(db *sql.DB) http.HandlerFunc {

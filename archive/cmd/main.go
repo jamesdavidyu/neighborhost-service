@@ -5,7 +5,7 @@ import (
 	"log"
 
 	// "github.com/jamesdavidyu/neighborhost-service/cmd/api"
-	"github.com/jamesdavidyu/neighborhost-service/db"
+	"github.com/jamesdavidyu/neighborhost-service/cmd/model/db"
 )
 
 func main() {

@@ -8,7 +8,7 @@ import (
 	postgresMigrate "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/jackc/pgx/v4/stdlib"
-	"github.com/jamesdavidyu/neighborhost-service/db"
+	"github.com/jamesdavidyu/neighborhost-service/cmd/model/db"
 )
 
 func main() {

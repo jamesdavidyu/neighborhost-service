@@ -8,8 +8,8 @@ import (
 
 	"github.com/gorilla/mux"
 	_ "github.com/jackc/pgx/v4/stdlib"
-	"github.com/jamesdavidyu/neighborhost-service/db"
-	"github.com/jamesdavidyu/neighborhost-service/services"
+	"github.com/jamesdavidyu/neighborhost-service/cmd/model/db"
+	"github.com/jamesdavidyu/neighborhost-service/controllers"
 	"github.com/jamesdavidyu/neighborhost-service/utils"
 )
 
@@ -28,8 +28,8 @@ func Routes() {
 	router := mux.NewRouter()
 	routePrefix := "/api/v1"
 	router.HandleFunc(routePrefix+"/status", GetStatus()).Methods("GET")
-	router.HandleFunc(routePrefix+"/neighborhoods", services.GetNeighborhoods(db)).Methods("GET")
-	router.HandleFunc(routePrefix+"/neighborhoods", services.CreateNeighborhood(db)).Methods("POST")
+	router.HandleFunc(routePrefix+"/neighborhoods", controllers.GetNeighborhoods(db)).Methods("GET")
+	router.HandleFunc(routePrefix+"/neighborhoods", controllers.CreateNeighborhood(db)).Methods("POST")
 
 	enhancedRouter := utils.EnableCORS(utils.JSONContentTypeMiddleware(router))
 
