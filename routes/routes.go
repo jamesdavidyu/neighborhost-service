@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -25,10 +26,21 @@ func Routes() {
 	}
 
 	router := mux.NewRouter()
-	router.HandleFunc("/api/v1/neighborhoods", services.GetNeighborhoods(db)).Methods("GET")
+	routePrefix := "/api/v1"
+	router.HandleFunc(routePrefix+"/status", GetStatus()).Methods("GET")
+	router.HandleFunc(routePrefix+"/neighborhoods", services.GetNeighborhoods(db)).Methods("GET")
 
 	enhancedRouter := utils.EnableCORS(utils.JSONContentTypeMiddleware(router))
 
 	log.Println("listening on", port)
 	log.Fatal(http.ListenAndServe(":"+port, enhancedRouter))
+}
+
+func GetStatus() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		okStatus := map[string]string{"status": "ok"}
+		if err := json.NewEncoder(w).Encode(okStatus); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
 }
