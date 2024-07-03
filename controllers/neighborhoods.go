@@ -20,11 +20,11 @@ func GetNeighborhoods(db *sql.DB) http.HandlerFunc {
 
 		neighborhoods := []types.Neighborhoods{}
 		for rows.Next() {
-			var n types.Neighborhoods
-			if err := rows.Scan(&n.ID, &n.Neighborhood, &n.CreatedAt); err != nil {
+			var neighborhood types.Neighborhoods
+			if err := rows.Scan(&neighborhood.ID, &neighborhood.Neighborhood, &neighborhood.CreatedAt); err != nil {
 				log.Fatal(err)
 			}
-			neighborhoods = append(neighborhoods, n)
+			neighborhoods = append(neighborhoods, neighborhood)
 		}
 		if err := rows.Err(); err != nil {
 			log.Fatal(err)
@@ -36,15 +36,15 @@ func GetNeighborhoods(db *sql.DB) http.HandlerFunc {
 
 func CreateNeighborhood(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var n types.Neighborhoods
-		json.NewDecoder(r.Body).Decode(&n)
+		var neighborhood types.Neighborhoods
+		json.NewDecoder(r.Body).Decode(&neighborhood)
 
 		_, err := db.Exec(`INSERT INTO neighborhoods (neighborhood)
-							VALUES ($1)`, n.Neighborhood)
+							VALUES ($1)`, neighborhood.Neighborhood)
 		if err != nil {
 			fmt.Println(err)
 		}
 
-		json.NewEncoder(w).Encode(n)
+		json.NewEncoder(w).Encode(neighborhood)
 	}
 }

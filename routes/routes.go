@@ -30,6 +30,7 @@ func Routes() {
 	router.HandleFunc(routePrefix+"/status", GetStatus()).Methods("GET")
 	router.HandleFunc(routePrefix+"/neighborhoods", controllers.GetNeighborhoods(db)).Methods("GET")
 	router.HandleFunc(routePrefix+"/neighborhoods", controllers.CreateNeighborhood(db)).Methods("POST")
+	router.HandleFunc(routePrefix+"/auth/register", controllers.CreateNeighbor(db)).Methods("POST")
 
 	enhancedRouter := utils.EnableCORS(utils.JSONContentTypeMiddleware(router))
 
