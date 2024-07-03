@@ -22,6 +22,11 @@ type Neighbors struct {
 type Register struct {
 	Email    string `json:"email" validate:"required,email"`
 	Username string `json:"username" validate:"required"`
-	Zipcode  string `json:"zipcode" validate:"required"`
+	Zipcode  string `json:"zipcode" validate:"required,min=5,max=5"`
 	Password string `json:"password" validate:"required,min=8"`
+}
+
+type Login struct {
+	EmailOrUsername string `json:"emailOrUsername" validate:"required"`
+	Password        string `json:"password" validate:"required,min=8"`
 }
