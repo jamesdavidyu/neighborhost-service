@@ -19,7 +19,7 @@ func NewHandler(store types.NeighborhoodStore, neighborStore types.NeighborStore
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/neighborhoods", auth.WithJWTAuth(h.handleGetNeighborhoods, h.neighborStore)).Methods(http.MethodGet)
+	router.HandleFunc("/neighborhoods", auth.WithJWTAuth(h.handleGetNeighborhoods, h.neighborStore)).Methods("GET")
 }
 
 func (h *Handler) handleGetNeighborhoods(w http.ResponseWriter, r *http.Request) {

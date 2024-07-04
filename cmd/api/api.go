@@ -12,6 +12,7 @@ import (
 	neighborControllers "github.com/jamesdavidyu/neighborhost-service/controllers/neighbors"
 	neighborhoodRoutes "github.com/jamesdavidyu/neighborhost-service/routes/neighborhoods"
 	neighborRoutes "github.com/jamesdavidyu/neighborhost-service/routes/neighbors"
+	"github.com/jamesdavidyu/neighborhost-service/utils"
 )
 
 type APIServer struct {
@@ -30,7 +31,7 @@ var Port = os.Getenv("PORT")
 
 func (s *APIServer) Run() error {
 	router := mux.NewRouter()
-	router.HandleFunc("/api/v1/status", getStatus()).Methods(http.MethodGet)
+	router.HandleFunc("/api/v1/status", getStatus()).Methods("GET")
 	subrouter := router.PathPrefix("/api/v1").Subrouter()
 
 	neighborStore := neighborControllers.NewStore(s.db)
@@ -46,8 +47,10 @@ func (s *APIServer) Run() error {
 
 	}
 
+	enhancedRouter := utils.EnableCORS(utils.JSONContentTypeMiddleware(router))
+
 	log.Println("listening on", Port)
-	return http.ListenAndServe(":"+Port, router)
+	return http.ListenAndServe(":"+Port, enhancedRouter)
 }
 
 func getStatus() http.HandlerFunc {

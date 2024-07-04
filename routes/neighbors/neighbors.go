@@ -23,8 +23,8 @@ func NewHandler(store types.NeighborStore) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/auth/register", h.handleRegister).Methods(http.MethodPost)
-	router.HandleFunc("/auth/login", h.handleLogin).Methods(http.MethodPost)
+	router.HandleFunc("/auth/register", h.handleRegister).Methods("POST")
+	router.HandleFunc("/auth/login", h.handleLogin).Methods("POST")
 }
 
 func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
@@ -93,6 +93,14 @@ func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		json.NewEncoder(w).Encode(map[string]string{"token": token})
+		json.NewEncoder(w).Encode(map[string]any{
+			"token":          token,
+			"neighborId":     neighbor.ID,
+			"email":          neighbor.Email,
+			"username":       neighbor.Username,
+			"zipcode":        neighbor.Zipcode,
+			"neighborhoodId": neighbor.NeighborhoodID,
+			"verified":       neighbor.Verified,
+		})
 	}
 }
