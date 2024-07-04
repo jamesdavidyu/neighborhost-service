@@ -1,38 +1,38 @@
 package api
 
-import (
-	"database/sql"
-	"log"
-	"net/http"
+// import (
+// 	"database/sql"
+// 	"log"
+// 	"net/http"
 
-	"github.com/gorilla/mux"
-	"github.com/jamesdavidyu/neighborhost-service/utils"
-)
+// 	"github.com/gorilla/mux"
+// 	"github.com/jamesdavidyu/neighborhost-service/utils"
+// )
 
-type APIServer struct {
-	addr string
-	db   *sql.DB
-}
+// type APIServer struct {
+// 	addr string
+// 	db   *sql.DB
+// }
 
-func NewAPIServer(addr string, db *sql.DB) *APIServer {
-	return &APIServer{
-		addr: addr,
-		db:   db,
-	}
-}
+// func NewAPIServer(addr string, db *sql.DB) *APIServer {
+// 	return &APIServer{
+// 		addr: addr,
+// 		db:   db,
+// 	}
+// }
 
-func (s *APIServer) Run() error {
-	router := mux.NewRouter()
-	// subrouter := router.PathPrefix("api/v1").Subrouter()
+// func (s *APIServer) Run() error {
+// 	router := mux.NewRouter()
+// 	// subrouter := router.PathPrefix("api/v1").Subrouter()
 
-	// router.HandleFunc("api/v1/test", service.GetTests(db)).Methods("GET")
+// 	// router.HandleFunc("api/v1/test", service.GetTests(db)).Methods("GET")
 
-	log.Println("Listening on", s.addr)
+// 	log.Println("Listening on", s.addr)
 
-	enhancedRouter := utils.EnableCORS(utils.JSONContentTypeMiddleware(router))
+// 	enhancedRouter := utils.EnableCORS(utils.JSONContentTypeMiddleware(router))
 
-	return http.ListenAndServe(s.addr, enhancedRouter)
-}
+// 	return http.ListenAndServe(s.addr, enhancedRouter)
+// }
 
 // func enableCORS(next http.Handler) http.Handler {
 // 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

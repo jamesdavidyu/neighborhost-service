@@ -1,8 +1,13 @@
 package main
 
 import (
+	"database/sql"
+	"log"
+	"os"
+
 	_ "github.com/jackc/pgx/v4/stdlib"
-	"github.com/jamesdavidyu/neighborhost-service/routes"
+	"github.com/jamesdavidyu/neighborhost-service/cmd/api"
+	"github.com/jamesdavidyu/neighborhost-service/cmd/model/db"
 )
 
 // go:embed templates/*
@@ -10,8 +15,27 @@ import (
 
 // var t = template.Must(template.ParseFS(resources, "templates/*"))
 
+var Port = os.Getenv("PORT")
+
 func main() {
-	routes.Routes()
+	db, err := db.DB()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	initStorage(db)
+
+	if Port == "" {
+		Port = "8080"
+
+	}
+
+	server := api.NewAPIServer(":"+Port, db)
+	if err := server.Run(); err != nil {
+		log.Fatal(err)
+	}
+
+	// routes.Routes()
 	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 	// 	data := map[string]string{
 	// 		"Region": os.Getenv("FLY_REGION"),
@@ -19,4 +43,13 @@ func main() {
 
 	// 	t.ExecuteTemplate(w, "index.html.tmpl", data)
 	// })
+}
+
+func initStorage(db *sql.DB) {
+	err := db.Ping()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println("DB: Successfully connected!")
 }

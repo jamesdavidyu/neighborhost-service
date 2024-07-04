@@ -2,6 +2,16 @@ package types
 
 import "time"
 
+type NeighborStore interface {
+	GetNeighborWithEmailOrUsername(emailOrUsername string) (*Neighbors, error)
+	GetNeighborById(id int) (*Neighbors, error)
+	CreateNeighbor(Neighbors) error
+}
+
+type NeighborhoodStore interface {
+	GetNeighborhoods() ([]Neighborhoods, error)
+}
+
 type Neighborhoods struct {
 	ID           int       `json:"id"`
 	Neighborhood string    `json:"neighborhood"`

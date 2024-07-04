@@ -1,32 +1,32 @@
 package main
 
-import (
-	"database/sql"
-	"log"
+// import (
+// 	"database/sql"
+// 	"log"
 
-	// "github.com/jamesdavidyu/neighborhost-service/cmd/api"
-	"github.com/jamesdavidyu/neighborhost-service/cmd/model/db"
-)
+// 	// "github.com/jamesdavidyu/neighborhost-service/cmd/api"
+// 	"github.com/jamesdavidyu/neighborhost-service/cmd/model/db"
+// )
 
-func main() {
-	db, err := db.DB()
-	if err != nil {
-		log.Fatal(err)
-	}
+// func main() {
+// 	db, err := db.DB()
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
 
-	initStorage(db)
+// 	initStorage(db)
 
-	// server := api.NewAPIServer(":8080", db)
-	// if err := server.Run(); err != nil {
-	// 	log.Fatal(err)
-	// }
-}
+// 	// server := api.NewAPIServer(":8080", db)
+// 	// if err := server.Run(); err != nil {
+// 	// 	log.Fatal(err)
+// 	// }
+// }
 
-func initStorage(db *sql.DB) {
-	err := db.Ping()
-	if err != nil {
-		log.Fatal(err)
-	}
+// func initStorage(db *sql.DB) {
+// 	err := db.Ping()
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
 
-	log.Println("DB: Successfully connected!")
-}
+// 	log.Println("DB: Successfully connected!")
+// }
