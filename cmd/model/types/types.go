@@ -13,13 +13,13 @@ type NeighborhoodStore interface {
 }
 
 type Neighborhoods struct {
-	ID           int       `json:"id"`
+	Id           int       `json:"id"`
 	Neighborhood string    `json:"neighborhood"`
 	CreatedAt    time.Time `json:"createdAt"`
 }
 
 type Neighbors struct {
-	ID             int       `json:"id"`
+	Id             int       `json:"id"`
 	Email          string    `json:"email"`
 	Username       string    `json:"username"`
 	Zipcode        string    `json:"zipcode"`
@@ -39,4 +39,53 @@ type Register struct {
 type Login struct {
 	EmailOrUsername string `json:"emailOrUsername" validate:"required"`
 	Password        string `json:"password" validate:"required,min=8"`
+}
+
+type Addresses struct {
+	Id             int       `json:"id"`
+	FirstName      string    `json:"firstName"`
+	LastName       string    `json:"lastName"`
+	Address        string    `json:"address"`
+	City           string    `json:"city"`
+	State          string    `json:"state"`
+	Zipcode        string    `json:"zipcode"`
+	NeighborId     int       `json:"neighborId"`
+	NeighborhoodId int       `json:"neighborhoodId"`
+	RecordedAt     time.Time `json:"recordedAt"`
+}
+
+type Events struct {
+	Id             int       `json:"id"`
+	Name           string    `json:"name"`
+	Description    string    `json:"description"`
+	Start          time.Time `json:"start"`
+	End            time.Time `json:"end"`
+	Reoccurrence   string    `json:"reoccurrence"`
+	ForUnloggedins bool      `json:"forUnloggedins"`
+	ForUnverifieds bool      `json:"forUnverifieds"`
+	InviteOnly     bool      `json:"inviteOnly"`
+	HostId         int       `json:"hostId"`
+	AddressId      int       `json:"addressId"`
+	CreatedAt      time.Time `json:"createdAt"`
+}
+
+type EventInvites struct {
+	Id                int       `json:"id"`
+	EventId           int       `json:"eventId"`
+	InvitedNeighborId int       `json:"invitedNeighborId"`
+	InvitedAt         time.Time `json:"invitedAt"`
+}
+
+type Friends struct {
+	Id                int       `json:"id"`
+	NeighborId        int       `json:"neighborId"`
+	NeighborsFriendId int       `json:"neighborsFriendId"`
+	FriendedAt        time.Time `json:"friendedAt"`
+}
+
+type FriendRequests struct {
+	Id                 int       `json:"id"`
+	NeighborId         int       `json:"neighborId"`
+	RequestingFriendId int       `json:"requestingFriendId"`
+	FriendRequestedAt  time.Time `json:"friendRequestedAt"`
 }

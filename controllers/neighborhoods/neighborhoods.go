@@ -40,8 +40,11 @@ func CreateNeighborhood(db *sql.DB) http.HandlerFunc {
 		var neighborhood types.Neighborhoods
 		json.NewDecoder(r.Body).Decode(&neighborhood)
 
-		_, err := db.Exec(`INSERT INTO neighborhoods (neighborhood)
-							VALUES ($1)`, neighborhood.Neighborhood)
+		_, err := db.Exec(
+			`INSERT INTO neighborhoods (neighborhood)
+			VALUES ($1)`,
+			neighborhood.Neighborhood,
+		)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -54,7 +57,7 @@ func scanRowsIntoNeighborhood(rows *sql.Rows) (*types.Neighborhoods, error) {
 	neighborhood := new(types.Neighborhoods)
 
 	err := rows.Scan(
-		&neighborhood.ID,
+		&neighborhood.Id,
 		&neighborhood.Neighborhood,
 		&neighborhood.CreatedAt,
 	)

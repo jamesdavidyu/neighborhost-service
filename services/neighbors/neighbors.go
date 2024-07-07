@@ -87,7 +87,7 @@ func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found"))
 	} else {
 		secret := []byte(config.Envs.JWTSecret)
-		token, err := auth.CreateJWT(secret, neighbor.ID)
+		token, err := auth.CreateJWT(secret, neighbor.Id)
 		if err != nil {
 			utils.WriteError(w, http.StatusInternalServerError, err)
 			return
@@ -95,7 +95,7 @@ func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
 
 		json.NewEncoder(w).Encode(map[string]any{
 			"token":          token,
-			"neighborId":     neighbor.ID,
+			"neighborId":     neighbor.Id,
 			"email":          neighbor.Email,
 			"username":       neighbor.Username,
 			"zipcode":        neighbor.Zipcode,
