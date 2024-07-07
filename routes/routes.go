@@ -1,4 +1,4 @@
-package api
+package routes
 
 import (
 	"database/sql"
@@ -10,8 +10,8 @@ import (
 	"github.com/gorilla/mux"
 	neighborhoodControllers "github.com/jamesdavidyu/neighborhost-service/controllers/neighborhoods"
 	neighborControllers "github.com/jamesdavidyu/neighborhost-service/controllers/neighbors"
-	neighborhoodRoutes "github.com/jamesdavidyu/neighborhost-service/routes/neighborhoods"
-	neighborRoutes "github.com/jamesdavidyu/neighborhost-service/routes/neighbors"
+	neighborhoodServices "github.com/jamesdavidyu/neighborhost-service/services/neighborhoods"
+	neighborServices "github.com/jamesdavidyu/neighborhost-service/services/neighbors"
 	"github.com/jamesdavidyu/neighborhost-service/utils"
 )
 
@@ -35,11 +35,11 @@ func (s *APIServer) Run() error {
 	subrouter := router.PathPrefix("/api/v1").Subrouter()
 
 	neighborStore := neighborControllers.NewStore(s.db)
-	neighborHandler := neighborRoutes.NewHandler(neighborStore)
+	neighborHandler := neighborServices.NewHandler(neighborStore)
 	neighborHandler.RegisterRoutes(subrouter)
 
 	neighborhoodStore := neighborhoodControllers.NewStore(s.db)
-	neighborhoodHandler := neighborhoodRoutes.NewHandler(neighborhoodStore, neighborStore)
+	neighborhoodHandler := neighborhoodServices.NewHandler(neighborhoodStore, neighborStore)
 	neighborhoodHandler.RegisterRoutes(subrouter)
 
 	if Port == "" {

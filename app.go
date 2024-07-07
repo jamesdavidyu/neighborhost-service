@@ -6,8 +6,8 @@ import (
 	"os"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
-	"github.com/jamesdavidyu/neighborhost-service/cmd/api"
 	"github.com/jamesdavidyu/neighborhost-service/cmd/model/db"
+	"github.com/jamesdavidyu/neighborhost-service/routes"
 )
 
 // go:embed templates/*
@@ -30,12 +30,11 @@ func main() {
 
 	}
 
-	server := api.NewAPIServer(":"+Port, db)
+	server := routes.NewAPIServer(":"+Port, db)
 	if err := server.Run(); err != nil {
 		log.Fatal(err)
 	}
 
-	// routes.Routes()
 	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 	// 	data := map[string]string{
 	// 		"Region": os.Getenv("FLY_REGION"),
