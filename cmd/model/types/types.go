@@ -8,6 +8,14 @@ type NeighborStore interface {
 	CreateNeighbor(Neighbors) error
 }
 
+type EventStore interface {
+	GetEventsByZipcode(id int) (*Events, error) // double check input
+}
+
+type AddressStore interface {
+	CreateAddress(Addresses) error
+}
+
 type NeighborhoodStore interface {
 	GetNeighborhoods() ([]Neighborhoods, error)
 }
@@ -52,6 +60,12 @@ type Addresses struct {
 	NeighborId     int       `json:"neighborId"`
 	NeighborhoodId int       `json:"neighborhoodId"`
 	RecordedAt     time.Time `json:"recordedAt"`
+}
+
+type Profiles struct {
+	Id         int `json:"id"`
+	NeighborId int `json:"neighborId"`
+	// demographic fields... bio, race, age
 }
 
 type Events struct {
