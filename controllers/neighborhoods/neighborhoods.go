@@ -2,9 +2,6 @@ package neighborhoods
 
 import (
 	"database/sql"
-	"encoding/json"
-	"fmt"
-	"net/http"
 
 	"github.com/jamesdavidyu/neighborhost-service/cmd/model/types"
 )
@@ -35,22 +32,17 @@ func (s *Store) GetNeighborhoods() ([]types.Neighborhoods, error) {
 	return neighborhoods, nil
 }
 
-func CreateNeighborhood(db *sql.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var neighborhood types.Neighborhoods
-		json.NewDecoder(r.Body).Decode(&neighborhood)
-
-		_, err := db.Exec(
-			`INSERT INTO neighborhoods (neighborhood)
-			VALUES ($1)`,
-			neighborhood.Neighborhood,
-		)
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		json.NewEncoder(w).Encode(neighborhood)
+func (s *Store) CreateNeighborhood(neighborhood types.Neighborhoods) error {
+	_, err := s.db.Exec(
+		`INSERT INTO neighborhoods (neighborhood)
+		VALUES ($1)`,
+		neighborhood.Neighborhood,
+	)
+	if err != nil {
+		return err
 	}
+
+	return nil
 }
 
 func scanRowsIntoNeighborhood(rows *sql.Rows) (*types.Neighborhoods, error) {

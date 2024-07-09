@@ -15,6 +15,57 @@ func NewStore(db *sql.DB) *Store {
 	return &Store{db: db}
 }
 
+func (s *Store) GetNeighborWithEmail(email string) (*types.Neighbors, error) {
+	rows, err := s.db.Query(
+		`SELECT * FROM neighbors
+		WHERE email = $1`,
+		email,
+	)
+	// need to handle errors better
+	if err != nil {
+		return nil, err
+	}
+
+	neighbor := new(types.Neighbors)
+	for rows.Next() {
+		neighbor, err = scanRowIntoNeighbor(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if neighbor.Id == 0 {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	return neighbor, nil
+}
+
+func (s *Store) GetNeighborWithUsername(username string) (*types.Neighbors, error) {
+	rows, err := s.db.Query(
+		`SELECT * FROM neighbors
+		WHERE username = $1`,
+		username,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	neighbor := new(types.Neighbors)
+	for rows.Next() {
+		neighbor, err = scanRowIntoNeighbor(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if neighbor.Id == 0 {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	return neighbor, nil
+}
+
 func (s *Store) GetNeighborWithEmailOrUsername(emailOrUsername string) (*types.Neighbors, error) {
 	rows, err := s.db.Query(
 		`SELECT * FROM neighbors
@@ -87,7 +138,7 @@ func scanRowIntoNeighbor(rows *sql.Rows) (*types.Neighbors, error) {
 		&neighbor.Zipcode,
 		&neighbor.Password,
 		&neighbor.Verified,
-		&neighbor.NeighborhoodID,
+		&neighbor.NeighborhoodId,
 		&neighbor.CreatedAt,
 	)
 	if err != nil {

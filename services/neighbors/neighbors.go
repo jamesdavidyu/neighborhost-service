@@ -28,40 +28,59 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 }
 
 func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
-	var neighbor types.Register
-	if err := json.NewDecoder(r.Body).Decode(&neighbor); err != nil {
+	var register types.Register
+	if err := json.NewDecoder(r.Body).Decode(&register); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
 
-	if err := utils.Validate.Struct(neighbor); err != nil {
+	if err := utils.Validate.Struct(register); err != nil {
 		errors := err.(validator.ValidationErrors)
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid submission for %v", errors))
 		return
 	}
 
-	// need to check if user already exists
+	// need to handle errors better
+	checkEmail, err := h.store.GetNeighborWithEmail(register.Email)
+	if checkEmail.Id == 0 {
+		checkUsername, err := h.store.GetNeighborWithUsername(register.Username)
+		if checkUsername.Id == 0 {
+			hashedPassword, err := bcrypt.GenerateFromPassword([]byte(register.Password), bcrypt.DefaultCost)
+			if err != nil {
+				utils.WriteError(w, http.StatusInternalServerError, err)
+				return
+			}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(neighbor.Password), bcrypt.DefaultCost)
+			err = h.store.CreateNeighbor(types.Neighbors{
+				Email:    register.Email,
+				Username: register.Username,
+				Zipcode:  register.Zipcode,
+				Password: string(hashedPassword),
+			})
+
+			if err != nil {
+				utils.WriteError(w, http.StatusInternalServerError, err)
+				return
+			} else {
+				neighbor, err := h.store.GetNeighborWithEmail(register.Email)
+				if err != nil {
+					utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found"))
+					return
+				}
+
+				w.WriteHeader(http.StatusCreated)
+				json.NewEncoder(w).Encode(neighbor) // need to return token and ID? Need to run getNeighborById again?
+			}
+		}
+		if err != nil {
+			utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found"))
+			return
+		}
+	}
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, err)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found"))
 		return
 	}
-
-	err = h.store.CreateNeighbor(types.Neighbors{
-		Email:    neighbor.Email,
-		Username: neighbor.Username,
-		Zipcode:  neighbor.Zipcode,
-		Password: string(hashedPassword),
-	})
-
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(neighbor)
 }
 
 func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
@@ -99,7 +118,7 @@ func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
 			"email":          neighbor.Email,
 			"username":       neighbor.Username,
 			"zipcode":        neighbor.Zipcode,
-			"neighborhoodId": neighbor.NeighborhoodID,
+			"neighborhoodId": neighbor.NeighborhoodId,
 			"verified":       neighbor.Verified,
 		})
 	}

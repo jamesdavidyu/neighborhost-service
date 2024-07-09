@@ -104,7 +104,7 @@ func permissionDenied(w http.ResponseWriter) {
 	utils.WriteError(w, http.StatusForbidden, fmt.Errorf("permission denied"))
 }
 
-func GetNeighborIDFromContext(ctx context.Context) int {
+func GetNeighborIdFromContext(ctx context.Context) int {
 	neighborId, ok := ctx.Value(NeighborKey).(int)
 	if !ok {
 		return -1

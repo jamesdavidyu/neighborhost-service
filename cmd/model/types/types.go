@@ -6,10 +6,14 @@ type NeighborStore interface {
 	GetNeighborWithEmailOrUsername(emailOrUsername string) (*Neighbors, error)
 	GetNeighborById(id int) (*Neighbors, error)
 	CreateNeighbor(Neighbors) error
+	GetNeighborWithEmail(email string) (*Neighbors, error)
+	GetNeighborWithUsername(username string) (*Neighbors, error)
+	// UpdatePassword(id int) (*Neighbors, error)
+	// UpdateZipcode(id int) (*Neighbors, error)
 }
 
 type EventStore interface {
-	GetEventsByZipcode(id int) (*Events, error) // double check input
+	GetEventsByZipcode(zipcode string) (*Events, error)
 }
 
 type AddressStore interface {
@@ -18,6 +22,7 @@ type AddressStore interface {
 
 type NeighborhoodStore interface {
 	GetNeighborhoods() ([]Neighborhoods, error)
+	CreateNeighborhood(Neighborhoods) error
 }
 
 type Neighborhoods struct {
@@ -33,7 +38,7 @@ type Neighbors struct {
 	Zipcode        string    `json:"zipcode"`
 	Password       string    `json:"-"`
 	Verified       bool      `json:"verified"`
-	NeighborhoodID int       `json:"neighborhoodId"`
+	NeighborhoodId int       `json:"neighborhoodId"`
 	CreatedAt      time.Time `json:"createdAt"`
 }
 
@@ -60,6 +65,17 @@ type Addresses struct {
 	NeighborId     int       `json:"neighborId"`
 	NeighborhoodId int       `json:"neighborhoodId"`
 	RecordedAt     time.Time `json:"recordedAt"`
+}
+
+type AddressPayload struct {
+	FirstName      string `json:"firstName"`
+	LastName       string `json:"lastName"`
+	Address        string `json:"address"`
+	City           string `json:"city"`
+	State          string `json:"state"`
+	Zipcode        string `json:"zipcode"`
+	NeighborId     int    `json:"neighborId"`
+	NeighborhoodId int    `json:"neighborhoodId"`
 }
 
 type Profiles struct {
