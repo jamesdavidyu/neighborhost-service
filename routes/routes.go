@@ -8,8 +8,10 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
+	addressControllers "github.com/jamesdavidyu/neighborhost-service/controllers/addresses"
 	neighborhoodControllers "github.com/jamesdavidyu/neighborhost-service/controllers/neighborhoods"
 	neighborControllers "github.com/jamesdavidyu/neighborhost-service/controllers/neighbors"
+	addressServices "github.com/jamesdavidyu/neighborhost-service/services/addresses"
 	neighborhoodServices "github.com/jamesdavidyu/neighborhost-service/services/neighborhoods"
 	neighborServices "github.com/jamesdavidyu/neighborhost-service/services/neighbors"
 	"github.com/jamesdavidyu/neighborhost-service/utils"
@@ -41,6 +43,10 @@ func (s *APIServer) Run() error {
 	neighborhoodStore := neighborhoodControllers.NewStore(s.db)
 	neighborhoodHandler := neighborhoodServices.NewHandler(neighborhoodStore, neighborStore)
 	neighborhoodHandler.RegisterRoutes(subrouter)
+
+	addressStore := addressControllers.NewStore(s.db)
+	addressHandler := addressServices.NewHandler(addressStore, neighborStore)
+	addressHandler.RegisterRoutes(subrouter)
 
 	if Port == "" {
 		Port = "8080"

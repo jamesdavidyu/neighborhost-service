@@ -22,7 +22,7 @@ func NewHandler(store types.AddressStore, neighborStore types.NeighborStore) *Ha
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/address", h.handleCreateAddress).Methods("POST")
+	router.HandleFunc("/address", auth.WithJWTAuth(h.handleCreateAddress, h.neighborStore)).Methods("POST")
 }
 
 func (h *Handler) handleCreateAddress(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +42,7 @@ func (h *Handler) handleCreateAddress(w http.ResponseWriter, r *http.Request) {
 
 	getZipcode, err := h.neighborStore.GetNeighborById(neighborId)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not fount"))
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found"))
 		return
 	}
 
@@ -52,7 +52,7 @@ func (h *Handler) handleCreateAddress(w http.ResponseWriter, r *http.Request) {
 		Address:        address.Address,
 		City:           address.City,
 		State:          address.State,
-		Zipcode:        getZipcode.Zipcode,
+		Zipcode:        getZipcode.Zipcode, // need to update neighbors table with addressPayload zipcode if different from neighborsZipcode then input updated one
 		NeighborId:     neighborId,
 		NeighborhoodId: getZipcode.NeighborhoodId,
 	})
@@ -63,5 +63,5 @@ func (h *Handler) handleCreateAddress(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(address)
+	json.NewEncoder(w).Encode(address) // does this need to return address id?
 }

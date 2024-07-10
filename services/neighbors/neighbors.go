@@ -64,7 +64,7 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 			} else {
 				neighbor, err := h.store.GetNeighborWithEmailOrUsername(register.Email)
 				if err != nil {
-					utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("neighbor not found"))
+					utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found"))
 					return
 				}
 
