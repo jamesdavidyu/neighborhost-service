@@ -128,6 +128,34 @@ func (s *Store) GetNeighborById(id int) (*types.Neighbors, error) {
 	return neighbor, nil
 }
 
+func (s *Store) UpdateZipcodeWithId(neighbor types.Neighbors) error {
+	_, err := s.db.Exec(
+		`UPDATE neighbors
+		SET zipcode = $1
+		WHERE id = $2`,
+		neighbor.Zipcode, neighbor.Id,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Store) UpdatePasswordWithId(neighbor types.Neighbors) error {
+	_, err := s.db.Exec(
+		`UPDATE neighbors
+		SET password = $1
+		WHERE id = $2`,
+		neighbor.Password, neighbor.Id,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *Store) CreateNeighbor(neighbor types.Neighbors) error {
 	_, err := s.db.Exec(
 		`INSERT INTO neighbors (email, username, zipcode, password)

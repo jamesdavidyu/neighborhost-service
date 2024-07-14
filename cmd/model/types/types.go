@@ -8,8 +8,8 @@ type NeighborStore interface {
 	CreateNeighbor(Neighbors) error
 	GetNeighborWithEmail(email string) (*Neighbors, error)
 	GetNeighborWithUsername(username string) (*Neighbors, error)
-	// UpdatePassword(id int) (*Neighbors, error)
-	// UpdateZipcode(id int) (*Neighbors, error)
+	UpdateZipcodeWithId(Neighbors) error
+	UpdatePasswordWithId(Neighbors) error
 }
 
 type EventStore interface {
@@ -54,6 +54,10 @@ type Login struct {
 	Password        string `json:"password" validate:"required,min=8"`
 }
 
+type UpdatePassword struct {
+	Password string `json:"password" validate:"required,min=8"`
+}
+
 type Addresses struct {
 	Id             int       `json:"id"`
 	FirstName      string    `json:"firstName"`
@@ -74,8 +78,8 @@ type AddressPayload struct {
 	City           string `json:"city"`
 	State          string `json:"state"`
 	Zipcode        string `json:"zipcode"`
-	NeighborId     int    `json:"neighborId"`
-	NeighborhoodId int    `json:"neighborhoodId"`
+	NeighborId     int    `json:"neighborId"`     // need?
+	NeighborhoodId int    `json:"neighborhoodId"` // need?
 }
 
 type Profiles struct {

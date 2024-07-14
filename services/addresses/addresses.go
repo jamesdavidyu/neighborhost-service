@@ -46,22 +46,32 @@ func (h *Handler) handleCreateAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if address.Zipcode != getZipcode.Zipcode {
+		err = h.neighborStore.UpdateZipcodeWithId(types.Neighbors{
+			Zipcode: address.Zipcode,
+			Id:      neighborId,
+		})
+		if err != nil {
+			utils.WriteError(w, http.StatusInternalServerError, err)
+			return
+		}
+	}
+
 	err = h.store.CreateAddress(types.Addresses{
 		FirstName:      address.FirstName,
 		LastName:       address.LastName,
 		Address:        address.Address,
 		City:           address.City,
 		State:          address.State,
-		Zipcode:        getZipcode.Zipcode, // need to update neighbors table with addressPayload zipcode if different from neighborsZipcode then input updated one
+		Zipcode:        address.Zipcode,
 		NeighborId:     neighborId,
 		NeighborhoodId: getZipcode.NeighborhoodId,
 	})
-
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(address) // does this need to return address id?
+	json.NewEncoder(w).Encode(address) // does this need to return anything?
 }

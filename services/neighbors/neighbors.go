@@ -25,6 +25,7 @@ func NewHandler(store types.NeighborStore) *Handler {
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/auth/register", h.handleRegister).Methods("POST")
 	router.HandleFunc("/auth/login", h.handleLogin).Methods("POST")
+	router.HandleFunc("/auth/updatepassword", auth.WithJWTAuth(h.handleUpdatePassword, h.store)).Methods("PUT") // add jwt auth
 }
 
 func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
@@ -123,5 +124,30 @@ func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
 			"neighborhoodId": neighbor.NeighborhoodId,
 			"verified":       neighbor.Verified,
 		})
+	}
+}
+
+func (h *Handler) handleUpdatePassword(w http.ResponseWriter, r *http.Request) {
+	var oldPassword types.UpdatePassword
+	if err := json.NewDecoder(r.Body).Decode(&oldPassword); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	// add logic to confirm old password or other confirmations
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(oldPassword.Password), bcrypt.DefaultCost)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	err = h.store.UpdatePasswordWithId(types.Neighbors{
+		Id:       1,
+		Password: string(hashedPassword),
+	})
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
 	}
 }
