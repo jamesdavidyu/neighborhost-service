@@ -128,13 +128,13 @@ func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleUpdatePassword(w http.ResponseWriter, r *http.Request) {
+	neighborId := auth.GetNeighborIdFromContext(r.Context())
+
 	var oldPassword types.UpdatePassword
 	if err := json.NewDecoder(r.Body).Decode(&oldPassword); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
-
-	// add logic to confirm old password or other confirmations
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(oldPassword.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -143,7 +143,7 @@ func (h *Handler) handleUpdatePassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = h.store.UpdatePasswordWithId(types.Neighbors{
-		Id:       1,
+		Id:       neighborId,
 		Password: string(hashedPassword),
 	})
 	if err != nil {
