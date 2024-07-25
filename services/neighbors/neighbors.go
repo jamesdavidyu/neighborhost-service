@@ -129,8 +129,8 @@ func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) handleUpdatePassword(w http.ResponseWriter, r *http.Request) {
 	neighborId := auth.GetNeighborIdFromContext(r.Context())
-
 	var oldPassword types.UpdatePassword
+
 	if err := json.NewDecoder(r.Body).Decode(&oldPassword); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return

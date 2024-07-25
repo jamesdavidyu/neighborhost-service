@@ -39,4 +39,10 @@ func main() {
 			log.Fatal(err)
 		}
 	}
+
+	if cmd == "force" {
+		if err := m.Force(4); err != nil && err != migrate.ErrNoChange {
+			log.Fatal(err)
+		}
+	}
 }

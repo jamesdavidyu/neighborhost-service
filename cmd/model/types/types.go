@@ -1,6 +1,10 @@
 package types
 
-import "time"
+import (
+	"time"
+
+	"github.com/jamesdavidyu/neighborhost-service/controllers/events"
+)
 
 type NeighborStore interface {
 	GetNeighborWithEmailOrUsername(emailOrUsername string) (*Neighbors, error)
@@ -13,11 +17,12 @@ type NeighborStore interface {
 }
 
 type EventStore interface {
-	GetEventsByZipcode(zipcode string) (*Events, error)
+	GetEventsByZipcode(zipcode string) (*events.EventAddresses, error)
 }
 
 type AddressStore interface {
 	CreateAddress(Addresses) error
+	GetAddressesByZipcode(zipcode string) (*Addresses, error)
 }
 
 type NeighborhoodStore interface {

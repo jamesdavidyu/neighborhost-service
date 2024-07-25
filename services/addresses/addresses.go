@@ -27,8 +27,8 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 
 func (h *Handler) handleCreateAddress(w http.ResponseWriter, r *http.Request) {
 	neighborId := auth.GetNeighborIdFromContext(r.Context())
-
 	var address types.AddressPayload
+
 	if err := json.NewDecoder(r.Body).Decode(&address); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
