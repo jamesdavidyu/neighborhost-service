@@ -52,7 +52,7 @@ func (s *Store) GetAddressesByZipcode(zipcode string) (*types.Addresses, error) 
 		return nil, err
 	}
 
-	addresses := new(types.Addresses)
+	addresses := new(types.Addresses) // change to make like in neighborhoods - do this for any get requests
 	for rows.Next() {
 		addresses, err = scanRowIntoAddresses(rows)
 		if err != nil {

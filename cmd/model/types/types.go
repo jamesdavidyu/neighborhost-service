@@ -2,8 +2,6 @@ package types
 
 import (
 	"time"
-
-	"github.com/jamesdavidyu/neighborhost-service/controllers/events"
 )
 
 type NeighborStore interface {
@@ -17,7 +15,8 @@ type NeighborStore interface {
 }
 
 type EventStore interface {
-	GetEventsByZipcode(zipcode string) (*events.EventAddresses, error)
+	GetPublicEvents() ([]Events, error)
+	GetEventsByZipcode(zipcode string) ([]EventAddresses, error)
 }
 
 type AddressStore interface {
@@ -106,6 +105,31 @@ type Events struct {
 	HostId         int       `json:"hostId"`
 	AddressId      int       `json:"addressId"`
 	CreatedAt      time.Time `json:"createdAt"`
+}
+
+type EventAddresses struct {
+	Id               int       `json:"id"`
+	Name             string    `json:"name"`
+	Description      string    `json:"description"`
+	Start            time.Time `json:"start"`
+	End              time.Time `json:"end"`
+	Reoccurrence     string    `json:"reoccurrence"`
+	ForUnloggedins   bool      `json:"forUnloggedins"`
+	ForUnverifieds   bool      `json:"forUnverifieds"`
+	InviteOnly       bool      `json:"inviteOnly"`
+	HostId           int       `json:"hostId"`
+	AddressId        int       `json:"addressId"`
+	CreatedAt        time.Time `json:"createdAt"`
+	AddressAddressId int       `json:"addressAddressId"`
+	FirstName        string    `json:"firstName"`
+	LastName         string    `json:"lastName"`
+	Address          string    `json:"address"`
+	City             string    `json:"city"`
+	State            string    `json:"state"`
+	Zipcode          string    `json:"zipcode"`
+	NeighborId       int       `json:"neighborId"`
+	NeighborhoodId   int       `json:"neighborhoodId"`
+	RecordedAt       time.Time `json:"recordedAt"`
 }
 
 type EventInvites struct {

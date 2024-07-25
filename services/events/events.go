@@ -13,15 +13,25 @@ import (
 type Handler struct {
 	store         types.EventStore
 	neighborStore types.NeighborStore
-	addressStore  types.AddressStore
 }
 
-func NewHandler(store types.EventStore, neighborStore types.NeighborStore, addressStore types.AddressStore) *Handler {
-	return &Handler{store: store, neighborStore: neighborStore, addressStore: addressStore}
+func NewHandler(store types.EventStore, neighborStore types.NeighborStore) *Handler {
+	return &Handler{store: store, neighborStore: neighborStore}
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/events", auth.WithJWTAuth(h.handleGetZipcodeEvents, h.neighborStore)).Methods("GET")
+	router.HandleFunc("/events", h.handleGetPublicEvents).Methods("GET")
+	router.HandleFunc("/auth/events", auth.WithJWTAuth(h.handleGetZipcodeEvents, h.neighborStore)).Methods("GET")
+}
+
+func (h *Handler) handleGetPublicEvents(w http.ResponseWriter, r *http.Request) {
+	events, err := h.store.GetPublicEvents()
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, events)
 }
 
 func (h *Handler) handleGetZipcodeEvents(w http.ResponseWriter, r *http.Request) {

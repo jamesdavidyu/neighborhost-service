@@ -127,6 +127,7 @@ func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// need logic for authenticating user when they forget password so they can update password
 func (h *Handler) handleUpdatePassword(w http.ResponseWriter, r *http.Request) {
 	neighborId := auth.GetNeighborIdFromContext(r.Context())
 	var oldPassword types.UpdatePassword

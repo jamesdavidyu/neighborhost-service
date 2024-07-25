@@ -51,7 +51,7 @@ func (s *APIServer) Run() error {
 	addressHandler.RegisterRoutes(subrouter)
 
 	eventStore := eventControllers.NewStore(s.db)
-	eventHandler := eventServices.NewHandler(eventStore, neighborStore, addressStore)
+	eventHandler := eventServices.NewHandler(eventStore, neighborStore)
 	eventHandler.RegisterRoutes(subrouter)
 
 	if Port == "" {
