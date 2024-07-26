@@ -17,6 +17,7 @@ type NeighborStore interface {
 type EventStore interface {
 	GetPublicEvents() ([]Events, error)
 	GetEventsByZipcode(zipcode string) ([]EventAddresses, error)
+	GetEventsByNeighborhoodId(id int) ([]EventAddresses, error)
 }
 
 type AddressStore interface {

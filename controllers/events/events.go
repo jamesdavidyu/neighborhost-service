@@ -57,6 +57,28 @@ func (s *Store) GetEventsByZipcode(zipcode string) ([]types.EventAddresses, erro
 	return events, nil
 }
 
+func (s *Store) GetEventsByNeighborhoodId(id int) ([]types.EventAddresses, error) {
+	rows, err := s.db.Query(
+		`SELECT * FROM events e
+		LEFT OUTER JOIN addresses a ON a.id = e.address_id
+		WHERE a.neighborhood_id = $1`, id,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	events := make([]types.EventAddresses, 0)
+	for rows.Next() {
+		event, err := scanRowIntoNeighborEvents(rows)
+		if err != nil {
+			return nil, err
+		}
+		events = append(events, *event)
+	}
+
+	return events, nil
+}
+
 func scanRowIntoPublicEvents(rows *sql.Rows) (*types.Events, error) {
 	events := new(types.Events)
 

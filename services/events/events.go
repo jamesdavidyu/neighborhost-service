@@ -22,6 +22,7 @@ func NewHandler(store types.EventStore, neighborStore types.NeighborStore) *Hand
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/events", h.handleGetPublicEvents).Methods("GET")
 	router.HandleFunc("/auth/events", auth.WithJWTAuth(h.handleGetZipcodeEvents, h.neighborStore)).Methods("GET")
+	router.HandleFunc("/auth/events/neighborhood-events", auth.WithJWTAuth(h.handleGetNeighborhoodEvents, h.neighborStore)).Methods("GET")
 }
 
 func (h *Handler) handleGetPublicEvents(w http.ResponseWriter, r *http.Request) {
@@ -37,13 +38,31 @@ func (h *Handler) handleGetPublicEvents(w http.ResponseWriter, r *http.Request) 
 func (h *Handler) handleGetZipcodeEvents(w http.ResponseWriter, r *http.Request) {
 	neighborId := auth.GetNeighborIdFromContext(r.Context())
 
-	getZipcode, err := h.neighborStore.GetNeighborById(neighborId)
+	getNeighbor, err := h.neighborStore.GetNeighborById(neighborId)
 	if err != nil {
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not found"))
 		return
 	}
 
-	events, err := h.store.GetEventsByZipcode(getZipcode.Zipcode)
+	events, err := h.store.GetEventsByZipcode(getNeighbor.Zipcode)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, events)
+}
+
+func (h *Handler) handleGetNeighborhoodEvents(w http.ResponseWriter, r *http.Request) {
+	neighborId := auth.GetNeighborIdFromContext(r.Context())
+
+	getNeighbor, err := h.neighborStore.GetNeighborById(neighborId)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not found"))
+		return
+	}
+
+	events, err := h.store.GetEventsByNeighborhoodId(getNeighbor.NeighborhoodId)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
