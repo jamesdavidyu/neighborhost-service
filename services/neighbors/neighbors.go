@@ -42,49 +42,51 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// need to handle errors better
-	checkEmail, err := h.store.GetNeighborWithEmail(register.Email)
-	if checkEmail == nil {
-		checkUsername, err := h.store.GetNeighborWithUsername(register.Username)
-		if checkUsername == nil {
-			hashedPassword, err := bcrypt.GenerateFromPassword([]byte(register.Password), bcrypt.DefaultCost)
-			if err != nil {
-				utils.WriteError(w, http.StatusInternalServerError, err)
-				return
-			}
-
-			err = h.store.CreateNeighbor(types.Neighbors{
-				Email:    register.Email,
-				Username: register.Username,
-				Zipcode:  register.Zipcode,
-				Password: string(hashedPassword),
-			})
-
-			if err != nil {
-				utils.WriteError(w, http.StatusInternalServerError, err)
-				return
-			} else {
-				neighbor, err := h.store.GetNeighborWithEmailOrUsername(register.Email)
-				if err != nil {
-					utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found"))
-					return
-				}
-
-				w.WriteHeader(http.StatusCreated)
-				json.NewEncoder(w).Encode(neighbor) // need to return token and ID? Need to run getNeighborById again?
-			}
-		} else {
-			utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("taken"))
-		}
-		if err != nil {
-			return
-		}
-	} else {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("taken"))
-	}
+	// checkEmail, err := h.store.GetNeighborWithEmail(register.Email)
+	// if checkEmail.Id == 0 {
+	// 	checkUsername, err := h.store.GetNeighborWithUsername(register.Username)
+	// 	if checkUsername.Id == 0 {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(register.Password), bcrypt.DefaultCost)
 	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
+
+	err = h.store.CreateNeighbor(types.Neighbors{
+		Email:    register.Email,
+		Username: register.Username,
+		Zipcode:  register.Zipcode,
+		Password: string(hashedPassword),
+	})
+
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("email and/or username taken"))
+		return
+	} else {
+		neighbor, err := h.store.GetNeighborWithEmailOrUsername(register.Email)
+		if err != nil {
+			utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found"))
+			return
+		}
+
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(neighbor) // need to return token and ID? Need to run getNeighborById again?
+	}
 }
+
+// 		} else {
+// 			utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("taken"))
+// 		}
+// 		if err != nil {
+// 			return
+// 		}
+// 	} else {
+// 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("taken"))
+// 	}
+// 	if err != nil {
+// 		return
+// 	}
+// }
 
 func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
 	var login types.Login

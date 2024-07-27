@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS zipcodes;
+
+DROP TABLE IF EXISTS zipcode;

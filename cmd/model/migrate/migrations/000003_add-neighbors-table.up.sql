@@ -7,7 +7,11 @@ CREATE TABLE IF NOT EXISTS neighbors (
     verified BOOLEAN DEFAULT 'false' NOT NULL,
     neighborhood_id INT DEFAULT 1 NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    /* ip address */
     CONSTRAINT fk_neighborhoods
         FOREIGN KEY(neighborhood_id)
-            REFERENCES neighborhoods(id)
+            REFERENCES neighborhoods(id),
+    CONSTRAINT fk_zipcodes
+        FOREIGN KEY(zipcode)
+            REFERENCES zipcodes(zipcode)
 );

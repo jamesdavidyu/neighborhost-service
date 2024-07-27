@@ -1,9 +1,17 @@
+/*
+1. PUBLIC
+2. ZIPCODE
+3. NEIGHBORHOOD
+*/
+
 package events
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/jamesdavidyu/neighborhost-service/cmd/model/types"
+	"github.com/jamesdavidyu/neighborhost-service/utils"
 )
 
 type Store struct {
@@ -14,10 +22,13 @@ func NewStore(db *sql.DB) *Store {
 	return &Store{db: db}
 }
 
+/* 1. PUBLIC */
+
 func (s *Store) GetPublicEvents() ([]types.Events, error) {
 	rows, err := s.db.Query(
 		`SELECT * FROM events
-		WHERE for_unloggedins = TRUE`,
+		WHERE for_unloggedins = TRUE
+		AND start >= $1`, time.Now(),
 	)
 	if err != nil {
 		return nil, err
@@ -25,7 +36,7 @@ func (s *Store) GetPublicEvents() ([]types.Events, error) {
 
 	events := make([]types.Events, 0)
 	for rows.Next() {
-		event, err := scanRowIntoPublicEvents(rows)
+		event, err := utils.ScanRowIntoPublicEvents(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -35,11 +46,14 @@ func (s *Store) GetPublicEvents() ([]types.Events, error) {
 	return events, nil
 }
 
-func (s *Store) GetEventsByZipcode(zipcode string) ([]types.EventAddresses, error) {
+/* 2. ZIPCODE */
+
+func (s *Store) GetEventsByZipcode(zipcode string, start time.Time) ([]types.EventAddresses, error) {
 	rows, err := s.db.Query(
 		`SELECT * FROM events e
 		LEFT OUTER JOIN addresses a ON a.id = e.address_id
-		WHERE a.zipcode = $1`, zipcode,
+		WHERE a.zipcode = $1
+		AND start >= $2`, zipcode, start,
 	)
 	if err != nil {
 		return nil, err
@@ -47,7 +61,7 @@ func (s *Store) GetEventsByZipcode(zipcode string) ([]types.EventAddresses, erro
 
 	events := make([]types.EventAddresses, 0)
 	for rows.Next() {
-		event, err := scanRowIntoNeighborEvents(rows)
+		event, err := utils.ScanRowIntoNeighborEvents(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -57,11 +71,14 @@ func (s *Store) GetEventsByZipcode(zipcode string) ([]types.EventAddresses, erro
 	return events, nil
 }
 
-func (s *Store) GetEventsByNeighborhoodId(id int) ([]types.EventAddresses, error) {
+/* 3. NEIGHBORHOOD */
+
+func (s *Store) GetEventsByNeighborhoodId(id int, start time.Time) ([]types.EventAddresses, error) {
 	rows, err := s.db.Query(
 		`SELECT * FROM events e
 		LEFT OUTER JOIN addresses a ON a.id = e.address_id
-		WHERE a.neighborhood_id = $1`, id,
+		WHERE a.neighborhood_id = $1
+		AND start >= $2`, id, start,
 	)
 	if err != nil {
 		return nil, err
@@ -69,7 +86,7 @@ func (s *Store) GetEventsByNeighborhoodId(id int) ([]types.EventAddresses, error
 
 	events := make([]types.EventAddresses, 0)
 	for rows.Next() {
-		event, err := scanRowIntoNeighborEvents(rows)
+		event, err := utils.ScanRowIntoNeighborEvents(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -79,60 +96,35 @@ func (s *Store) GetEventsByNeighborhoodId(id int) ([]types.EventAddresses, error
 	return events, nil
 }
 
-func scanRowIntoPublicEvents(rows *sql.Rows) (*types.Events, error) {
-	events := new(types.Events)
-
-	err := rows.Scan(
-		&events.Id,
-		&events.Name,
-		&events.Description,
-		&events.Start,
-		&events.End,
-		&events.Reoccurrence,
-		&events.ForUnloggedins,
-		&events.ForUnverifieds,
-		&events.InviteOnly,
-		&events.HostId,
-		&events.AddressId,
-		&events.CreatedAt,
+func (s *Store) CreateEvent(event types.Events) error {
+	_, err := s.db.Exec(
+		`INSERT INTO events (
+			name,
+			description,
+			start,
+			"end",
+			reoccurrence,
+			for_unloggedins,
+			for_unverifieds,
+			invite_only,
+			host_id,
+			address_id
+		)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+		event.Name,
+		event.Description,
+		event.Start,
+		event.End,
+		event.Reoccurrence,
+		event.ForUnloggedins,
+		event.ForUnverifieds,
+		event.InviteOnly,
+		event.HostId,
+		event.AddressId,
 	)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return events, nil
-}
-
-func scanRowIntoNeighborEvents(rows *sql.Rows) (*types.EventAddresses, error) {
-	events := new(types.EventAddresses)
-
-	err := rows.Scan(
-		&events.Id,
-		&events.Name,
-		&events.Description,
-		&events.Start,
-		&events.End,
-		&events.Reoccurrence,
-		&events.ForUnloggedins,
-		&events.ForUnverifieds,
-		&events.InviteOnly,
-		&events.HostId,
-		&events.AddressId,
-		&events.CreatedAt,
-		&events.AddressAddressId,
-		&events.FirstName,
-		&events.LastName,
-		&events.Address,
-		&events.City,
-		&events.State,
-		&events.Zipcode,
-		&events.NeighborId,
-		&events.NeighborhoodId,
-		&events.RecordedAt,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return events, nil
+	return nil
 }

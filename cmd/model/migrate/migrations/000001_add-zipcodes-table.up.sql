@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS zipcodes (
+    zipcode VARCHAR(5) PRIMARY KEY,
+    city VARCHAR(30) NOT NULL,
+    state VARCHAR(35) NOT NULL,
+    timezone VARCHAR(30) NOT NULL
+);

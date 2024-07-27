@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jamesdavidyu/neighborhost-service/cmd/model/types"
+	"github.com/jamesdavidyu/neighborhost-service/utils"
 )
 
 type Store struct {
@@ -27,11 +28,11 @@ func (s *Store) GetNeighborWithEmail(email string) (*types.Neighbors, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	// defer rows.Close()
 
-	if !rows.Next() {
-		return nil, sql.ErrNoRows
-	}
+	// if !rows.Next() {
+	// 	return nil, sql.ErrNoRows
+	// }
 
 	if err := rows.Scan(
 		&neighbor.Id,
@@ -60,11 +61,11 @@ func (s *Store) GetNeighborWithUsername(username string) (*types.Neighbors, erro
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	// defer rows.Close()
 
-	if !rows.Next() {
-		return nil, sql.ErrNoRows
-	}
+	// if !rows.Next() {
+	// 	return nil, sql.ErrNoRows
+	// }
 
 	if err := rows.Scan(
 		&neighbor.Id,
@@ -94,7 +95,7 @@ func (s *Store) GetNeighborWithEmailOrUsername(emailOrUsername string) (*types.N
 
 	neighbor := new(types.Neighbors)
 	for rows.Next() {
-		neighbor, err = scanRowIntoNeighbor(rows)
+		neighbor, err = utils.ScanRowIntoNeighbor(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -115,7 +116,7 @@ func (s *Store) GetNeighborById(id int) (*types.Neighbors, error) {
 
 	neighbor := new(types.Neighbors)
 	for rows.Next() {
-		neighbor, err = scanRowIntoNeighbor(rows)
+		neighbor, err = utils.ScanRowIntoNeighbor(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -170,24 +171,4 @@ func (s *Store) CreateNeighbor(neighbor types.Neighbors) error {
 	}
 
 	return nil
-}
-
-func scanRowIntoNeighbor(rows *sql.Rows) (*types.Neighbors, error) {
-	neighbor := new(types.Neighbors)
-
-	err := rows.Scan(
-		&neighbor.Id,
-		&neighbor.Email,
-		&neighbor.Username,
-		&neighbor.Zipcode,
-		&neighbor.Password,
-		&neighbor.Verified,
-		&neighbor.NeighborhoodId,
-		&neighbor.CreatedAt,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return neighbor, nil
 }

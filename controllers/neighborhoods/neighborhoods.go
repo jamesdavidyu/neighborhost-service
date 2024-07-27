@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/jamesdavidyu/neighborhost-service/cmd/model/types"
+	"github.com/jamesdavidyu/neighborhost-service/utils"
 )
 
 type Store struct {
@@ -22,7 +23,7 @@ func (s *Store) GetNeighborhoods() ([]types.Neighborhoods, error) {
 
 	neighborhoods := make([]types.Neighborhoods, 0)
 	for rows.Next() {
-		neighborhood, err := scanRowsIntoNeighborhood(rows)
+		neighborhood, err := utils.ScanRowsIntoNeighborhood(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -43,19 +44,4 @@ func (s *Store) CreateNeighborhood(neighborhood types.Neighborhoods) error {
 	}
 
 	return nil
-}
-
-func scanRowsIntoNeighborhood(rows *sql.Rows) (*types.Neighborhoods, error) {
-	neighborhood := new(types.Neighborhoods)
-
-	err := rows.Scan(
-		&neighborhood.Id,
-		&neighborhood.Neighborhood,
-		&neighborhood.CreatedAt,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return neighborhood, nil
 }

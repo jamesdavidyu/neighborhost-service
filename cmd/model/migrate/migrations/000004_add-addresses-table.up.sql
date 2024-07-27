@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS addresses (
     city VARCHAR(45) NOT NULL,
     state VARCHAR(35) NOT NULL,
     zipcode VARCHAR(5) NOT NULL,
-    neighbor_id INT NOT NULL UNIQUE,
+    neighbor_id INT NOT NULL,
     neighborhood_id INT NOT NULL, 
     recorded_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_neighbors

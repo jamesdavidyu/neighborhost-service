@@ -4,6 +4,11 @@ import (
 	"time"
 )
 
+type ZipcodeStore interface {
+	GetZipcodeData(zipcode string) (*Zipcodes, error)
+	ValidateZipcode(city string, state string, zipcode string) (*Zipcodes, error)
+}
+
 type NeighborStore interface {
 	GetNeighborWithEmailOrUsername(emailOrUsername string) (*Neighbors, error)
 	GetNeighborById(id int) (*Neighbors, error)
@@ -16,18 +21,36 @@ type NeighborStore interface {
 
 type EventStore interface {
 	GetPublicEvents() ([]Events, error)
-	GetEventsByZipcode(zipcode string) ([]EventAddresses, error)
-	GetEventsByNeighborhoodId(id int) ([]EventAddresses, error)
+	GetEventsByZipcode(zipcode string, start time.Time) ([]EventAddresses, error)
+	GetEventsByNeighborhoodId(id int, start time.Time) ([]EventAddresses, error)
+	CreateEvent(Events) error
 }
 
 type AddressStore interface {
 	CreateAddress(Addresses) error
 	GetAddressesByZipcode(zipcode string) (*Addresses, error)
+	GetAddressIdByAddress(
+		firstName string,
+		lastName string,
+		address string,
+		city string,
+		state string,
+		zipcode string,
+		neighborId int,
+	) (*Addresses, error)
+	GetAddressByNeighborId(id int) (*Addresses, error)
 }
 
 type NeighborhoodStore interface {
 	GetNeighborhoods() ([]Neighborhoods, error)
 	CreateNeighborhood(Neighborhoods) error
+}
+
+type Zipcodes struct {
+	Zipcode  string `json:"zipcode"`
+	City     string `json:"city"`
+	State    string `json:"state"`
+	Timezone string `json:"timezone"`
 }
 
 type Neighborhoods struct {
@@ -77,7 +100,7 @@ type Addresses struct {
 }
 
 type AddressPayload struct {
-	FirstName      string `json:"firstName"`
+	FirstName      string `json:"firstName"` // need to add validation
 	LastName       string `json:"lastName"`
 	Address        string `json:"address"`
 	City           string `json:"city"`
@@ -106,6 +129,23 @@ type Events struct {
 	HostId         int       `json:"hostId"`
 	AddressId      int       `json:"addressId"`
 	CreatedAt      time.Time `json:"createdAt"`
+}
+
+type EventPayload struct {
+	Name           string    `json:"name"`
+	Description    string    `json:"description"`
+	Start          time.Time `json:"start"`
+	End            time.Time `json:"end"`
+	Reoccurrence   string    `json:"reoccurrence"`
+	ForUnloggedins bool      `json:"forUnloggedins"`
+	ForUnverifieds bool      `json:"forUnverifieds"`
+	InviteOnly     bool      `json:"inviteOnly"`
+	Address        string    `json:"address"`
+	City           string    `json:"city"`
+	State          string    `json:"state"`
+	Zipcode        string    `json:"zipcode"`
+	HostId         int       `json:"hostId"`
+	AddressId      int       `json:"addressId"`
 }
 
 type EventAddresses struct {

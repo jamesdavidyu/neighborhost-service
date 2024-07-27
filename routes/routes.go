@@ -12,6 +12,7 @@ import (
 	eventControllers "github.com/jamesdavidyu/neighborhost-service/controllers/events"
 	neighborhoodControllers "github.com/jamesdavidyu/neighborhost-service/controllers/neighborhoods"
 	neighborControllers "github.com/jamesdavidyu/neighborhost-service/controllers/neighbors"
+	"github.com/jamesdavidyu/neighborhost-service/controllers/zipcodes"
 	addressServices "github.com/jamesdavidyu/neighborhost-service/services/addresses"
 	eventServices "github.com/jamesdavidyu/neighborhost-service/services/events"
 	neighborhoodServices "github.com/jamesdavidyu/neighborhost-service/services/neighborhoods"
@@ -38,6 +39,8 @@ func (s *APIServer) Run() error {
 	router.HandleFunc("/api/v1/status", getStatus()).Methods("GET")
 	subrouter := router.PathPrefix("/api/v1").Subrouter()
 
+	zipcodeStore := zipcodes.NewStore(s.db)
+
 	neighborStore := neighborControllers.NewStore(s.db)
 	neighborHandler := neighborServices.NewHandler(neighborStore)
 	neighborHandler.RegisterRoutes(subrouter)
@@ -51,7 +54,7 @@ func (s *APIServer) Run() error {
 	addressHandler.RegisterRoutes(subrouter)
 
 	eventStore := eventControllers.NewStore(s.db)
-	eventHandler := eventServices.NewHandler(eventStore, neighborStore)
+	eventHandler := eventServices.NewHandler(eventStore, neighborStore, zipcodeStore, addressStore)
 	eventHandler.RegisterRoutes(subrouter)
 
 	if Port == "" {

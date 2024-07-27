@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS events (
     description VARCHAR(1000) NOT NULL,
     start TIMESTAMP NOT NULL,
     "end" TIMESTAMP NOT NULL,
-    reoccurrence VARCHAR(14),
+    reoccurrence VARCHAR(14) NOT NULL,
     for_unloggedins BOOLEAN DEFAULT 'false' NOT NULL,
     for_unverifieds BOOLEAN DEFAULT 'false' NOT NULL,
     invite_only BOOLEAN DEFAULT 'false' NOT NULL,

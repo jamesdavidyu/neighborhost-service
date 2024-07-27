@@ -40,13 +40,13 @@ func (h *Handler) handleCreateAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	getZipcode, err := h.neighborStore.GetNeighborById(neighborId)
+	getNeighbor, err := h.neighborStore.GetNeighborById(neighborId)
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found"))
 		return
 	}
 
-	if address.Zipcode != getZipcode.Zipcode {
+	if address.Zipcode != getNeighbor.Zipcode {
 		err = h.neighborStore.UpdateZipcodeWithId(types.Neighbors{
 			Zipcode: address.Zipcode,
 			Id:      neighborId,
@@ -65,7 +65,7 @@ func (h *Handler) handleCreateAddress(w http.ResponseWriter, r *http.Request) {
 		State:          address.State,
 		Zipcode:        address.Zipcode,
 		NeighborId:     neighborId,
-		NeighborhoodId: getZipcode.NeighborhoodId,
+		NeighborhoodId: getNeighbor.NeighborhoodId,
 	})
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
