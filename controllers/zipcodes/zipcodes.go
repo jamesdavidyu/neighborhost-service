@@ -46,9 +46,9 @@ func (s *Store) ValidateZipcode(city string, state string, zipcode string) (*typ
 		return nil, err
 	}
 
-	if !rows.Next() {
-		return nil, sql.ErrNoRows
-	}
+	// if !rows.Next() {
+	// 	return nil, sql.ErrNoRows
+	// }
 
 	zipcodes := new(types.Zipcodes)
 	for rows.Next() {

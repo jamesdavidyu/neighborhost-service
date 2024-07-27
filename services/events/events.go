@@ -3,7 +3,6 @@ package events
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -35,7 +34,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 func (h *Handler) handleGetPublicEvents(w http.ResponseWriter, r *http.Request) {
 	events, err := h.store.GetPublicEvents()
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, err)
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 		return
 	}
 
@@ -47,24 +46,25 @@ func (h *Handler) handleGetZipcodeEvents(w http.ResponseWriter, r *http.Request)
 
 	getNeighbor, err := h.neighborStore.GetNeighborById(neighborId)
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not found"))
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 		return
 	}
 
 	getZipcodeData, err := h.zipcodeStore.GetZipcodeData(getNeighbor.Zipcode)
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not found"))
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 		return
 	}
 
 	location, err := time.LoadLocation(getZipcodeData.Timezone)
 	if err != nil {
-		log.Fatalf("Failed to load location: %v", err)
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not found"))
+		return
 	}
 
 	events, err := h.store.GetEventsByZipcode(getNeighbor.Zipcode, time.Now().In(location))
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, err)
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 		return
 	}
 
@@ -76,24 +76,25 @@ func (h *Handler) handleGetNeighborhoodEvents(w http.ResponseWriter, r *http.Req
 
 	getNeighbor, err := h.neighborStore.GetNeighborById(neighborId)
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not found"))
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 		return
 	}
 
 	getZipcodeData, err := h.zipcodeStore.GetZipcodeData(getNeighbor.Zipcode)
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not found"))
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 		return
 	}
 
 	location, err := time.LoadLocation(getZipcodeData.Timezone)
 	if err != nil {
-		log.Fatalf("Failed to load location: %v", err)
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not found"))
+		return
 	}
 
 	events, err := h.store.GetEventsByNeighborhoodId(getNeighbor.NeighborhoodId, time.Now().In(location))
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, err)
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 		return
 	}
 
@@ -105,7 +106,7 @@ func (h *Handler) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 	var event types.EventPayload
 
 	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("bad data"))
 		return
 	}
 
@@ -120,18 +121,19 @@ func (h *Handler) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 		event.State,
 		event.Zipcode,
 	)
-	if validateZipcode == nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found"))
+
+	if validateZipcode.Zipcode == "" {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not found"))
 		return
 	} else {
 		if err != nil {
-			utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found"))
+			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 			return
 		}
 
 		getAddress, err := h.addressStore.GetAddressByNeighborId(neighborId)
 		if err != nil {
-			utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found"))
+			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 			return
 		}
 
@@ -146,57 +148,11 @@ func (h *Handler) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 		)
 
 		if getAddressId.Id == 0 {
-			err = h.addressStore.CreateAddress(types.Addresses{
-				FirstName:      getAddress.FirstName,
-				LastName:       getAddress.LastName,
-				Address:        event.Address,
-				City:           event.City,
-				State:          event.State,
-				Zipcode:        event.Zipcode,
-				NeighborId:     neighborId,
-				NeighborhoodId: getAddress.NeighborhoodId,
-			})
-			if err != nil {
-				utils.WriteError(w, http.StatusInternalServerError, err)
-				return
-			}
-
-			getNewAddressId, err := h.addressStore.GetAddressIdByAddress(
-				getAddress.FirstName,
-				getAddress.LastName,
-				event.Address,
-				event.City,
-				event.State,
-				event.Zipcode,
-				neighborId,
-			)
-			if err != nil {
-				utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found"))
-				return
-			}
-
-			err = h.store.CreateEvent(types.Events{
-				Name:           event.Name,
-				Description:    event.Description,
-				Start:          event.Start,
-				End:            event.End,
-				Reoccurrence:   event.Reoccurrence,
-				ForUnloggedins: event.ForUnloggedins,
-				ForUnverifieds: event.ForUnverifieds,
-				InviteOnly:     event.InviteOnly,
-				HostId:         neighborId,
-				AddressId:      getNewAddressId.Id,
-			})
-			if err != nil {
-				utils.WriteError(w, http.StatusInternalServerError, err)
-				return
-			}
-
-			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode(event)
+			utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("first time using address"))
+			return
 		} else {
 			if err != nil {
-				utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found"))
+				utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 				return
 			}
 
@@ -213,7 +169,7 @@ func (h *Handler) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 				AddressId:      getAddressId.Id,
 			})
 			if err != nil {
-				utils.WriteError(w, http.StatusInternalServerError, err)
+				utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 				return
 			}
 

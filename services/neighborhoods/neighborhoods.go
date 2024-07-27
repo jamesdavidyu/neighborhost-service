@@ -1,6 +1,7 @@
 package neighborhoods
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -25,7 +26,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 func (h *Handler) handleGetNeighborhoods(w http.ResponseWriter, r *http.Request) {
 	neighborhoods, err := h.store.GetNeighborhoods()
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, err)
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 		return
 	}
 

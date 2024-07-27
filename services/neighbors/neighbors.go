@@ -31,7 +31,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	var register types.Register
 	if err := json.NewDecoder(r.Body).Decode(&register); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("bad data"))
 		return
 	}
 
@@ -48,7 +48,7 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	// 	if checkUsername.Id == 0 {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(register.Password), bcrypt.DefaultCost)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, err)
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 		return
 	}
 
@@ -60,12 +60,12 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("email and/or username taken"))
+		utils.WriteError(w, http.StatusAlreadyReported, fmt.Errorf("email and/or username taken"))
 		return
 	} else {
 		neighbor, err := h.store.GetNeighborWithEmailOrUsername(register.Email)
 		if err != nil {
-			utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found"))
+			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 			return
 		}
 
@@ -91,7 +91,7 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
 	var login types.Login
 	if err := json.NewDecoder(r.Body).Decode(&login); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("bad data"))
 		return
 	}
 
@@ -103,17 +103,18 @@ func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
 
 	neighbor, err := h.store.GetNeighborWithEmailOrUsername(login.EmailOrUsername)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found"))
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 		return
 	}
 
 	if bcrypt.CompareHashAndPassword([]byte(neighbor.Password), []byte(login.Password)) != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found"))
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+		return
 	} else {
 		secret := []byte(config.Envs.JWTSecret)
 		token, err := auth.CreateJWT(secret, neighbor.Id)
 		if err != nil {
-			utils.WriteError(w, http.StatusInternalServerError, err)
+			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 			return
 		}
 
@@ -135,13 +136,13 @@ func (h *Handler) handleUpdatePassword(w http.ResponseWriter, r *http.Request) {
 	var oldPassword types.UpdatePassword
 
 	if err := json.NewDecoder(r.Body).Decode(&oldPassword); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("bad data"))
 		return
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(oldPassword.Password), bcrypt.DefaultCost)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, err)
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 		return
 	}
 
@@ -150,7 +151,7 @@ func (h *Handler) handleUpdatePassword(w http.ResponseWriter, r *http.Request) {
 		Password: string(hashedPassword),
 	})
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, err)
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 		return
 	}
 }

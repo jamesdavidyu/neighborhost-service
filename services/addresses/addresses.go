@@ -30,7 +30,7 @@ func (h *Handler) handleCreateAddress(w http.ResponseWriter, r *http.Request) {
 	var address types.AddressPayload
 
 	if err := json.NewDecoder(r.Body).Decode(&address); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("bad data"))
 		return
 	}
 
@@ -42,7 +42,7 @@ func (h *Handler) handleCreateAddress(w http.ResponseWriter, r *http.Request) {
 
 	getNeighbor, err := h.neighborStore.GetNeighborById(neighborId)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found"))
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 		return
 	}
 
@@ -52,7 +52,7 @@ func (h *Handler) handleCreateAddress(w http.ResponseWriter, r *http.Request) {
 			Id:      neighborId,
 		})
 		if err != nil {
-			utils.WriteError(w, http.StatusInternalServerError, err)
+			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 			return
 		}
 	}
@@ -68,7 +68,7 @@ func (h *Handler) handleCreateAddress(w http.ResponseWriter, r *http.Request) {
 		NeighborhoodId: getNeighbor.NeighborhoodId,
 	})
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, err)
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 		return
 	}
 
