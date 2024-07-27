@@ -19,13 +19,6 @@ type NeighborStore interface {
 	UpdatePasswordWithId(Neighbors) error
 }
 
-type EventStore interface {
-	GetPublicEvents() ([]Events, error)
-	GetEventsByZipcode(zipcode string, start time.Time) ([]EventAddresses, error)
-	GetEventsByNeighborhoodId(id int, start time.Time) ([]EventAddresses, error)
-	CreateEvent(Events) error
-}
-
 type AddressStore interface {
 	CreateAddress(Addresses) error
 	GetAddressesByZipcode(zipcode string) (*Addresses, error)
@@ -39,6 +32,16 @@ type AddressStore interface {
 		neighborId int,
 	) (*Addresses, error)
 	GetAddressByNeighborId(id int) (*Addresses, error)
+}
+
+type EventStore interface {
+	GetPublicEvents() ([]Events, error)
+	GetEventsByZipcode(zipcode string, start time.Time) ([]EventAddresses, error)
+	ZipcodeEventsOnDate(zipcode string, dateTime time.Time) ([]EventAddresses, error)
+	ZipcodeEventsBeforeDate(zipcode string, dateTime time.Time) ([]EventAddresses, error)
+	ZipcodeEventsAfterDate(zipcode string, dateTime time.Time) ([]EventAddresses, error)
+	GetEventsByNeighborhoodId(id int, start time.Time) ([]EventAddresses, error)
+	CreateEvent(Events) error
 }
 
 type NeighborhoodStore interface {
@@ -131,7 +134,7 @@ type Events struct {
 	CreatedAt      time.Time `json:"createdAt"`
 }
 
-type EventPayload struct {
+type CreateEventPayload struct {
 	Name           string    `json:"name"`
 	Description    string    `json:"description"`
 	Start          time.Time `json:"start"`
@@ -146,6 +149,11 @@ type EventPayload struct {
 	Zipcode        string    `json:"zipcode"`
 	HostId         int       `json:"hostId"`
 	AddressId      int       `json:"addressId"`
+}
+
+type FilterEventPayload struct {
+	DateFilter string    `json:"dateFilter"`
+	DateTime   time.Time `json:"dateTime"`
 }
 
 type EventAddresses struct {

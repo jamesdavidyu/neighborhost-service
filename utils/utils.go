@@ -1,9 +1,10 @@
 /*
 1. GENERAL
-2. FOR NEIGHBORS CONTROLLERS
-3. FOR ADDRESSES CONTROLLERS
-4. FOR NEIGHBORHOODS CONTROLLERS
-5. FOR EVENT CONTROLLERS
+2. FOR ZIPCODE CONTROLLERS
+3. FOR NEIGHBORS CONTROLLERS
+4. FOR ADDRESSES CONTROLLERS
+5. FOR NEIGHBORHOODS CONTROLLERS
+6. FOR EVENT CONTROLLERS
 */
 
 package utils
@@ -72,7 +73,7 @@ func ScanRowIntoZipcodes(rows *sql.Rows) (*types.Zipcodes, error) {
 	return zipcodeData, nil
 }
 
-/* 2. FOR NEIGHBORS CONTROLLERS */
+/* 3. FOR NEIGHBORS CONTROLLERS */
 
 func ScanRowIntoNeighbor(rows *sql.Rows) (*types.Neighbors, error) {
 	neighbor := new(types.Neighbors)
@@ -94,7 +95,7 @@ func ScanRowIntoNeighbor(rows *sql.Rows) (*types.Neighbors, error) {
 	return neighbor, nil
 }
 
-/* 3. FOR ADDRESSES CONTROLLERS */
+/* 4. FOR ADDRESSES CONTROLLERS */
 
 func ScanRowIntoAddresses(rows *sql.Rows) (*types.Addresses, error) {
 	addresses := new(types.Addresses)
@@ -118,7 +119,7 @@ func ScanRowIntoAddresses(rows *sql.Rows) (*types.Addresses, error) {
 	return addresses, nil
 }
 
-/* 4. FOR NEIGHBORHOODS CONTROLLERS */
+/* 5. FOR NEIGHBORHOODS CONTROLLERS */
 
 func ScanRowsIntoNeighborhood(rows *sql.Rows) (*types.Neighborhoods, error) {
 	neighborhood := new(types.Neighborhoods)
@@ -135,7 +136,7 @@ func ScanRowsIntoNeighborhood(rows *sql.Rows) (*types.Neighborhoods, error) {
 	return neighborhood, nil
 }
 
-/* 5. FOR EVENT CONTROLLERS */
+/* 6. FOR EVENT CONTROLLERS */
 
 func ScanRowIntoPublicEvents(rows *sql.Rows) (*types.Events, error) {
 	events := new(types.Events)

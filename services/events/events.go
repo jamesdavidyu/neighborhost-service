@@ -27,6 +27,7 @@ func NewHandler(store types.EventStore, neighborStore types.NeighborStore, zipco
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/events", h.handleGetPublicEvents).Methods("GET")
 	router.HandleFunc("/auth/events", auth.WithJWTAuth(h.handleGetZipcodeEvents, h.neighborStore)).Methods("GET")
+	router.HandleFunc("/auth/events", auth.WithJWTAuth(h.handleZipcodeEventsWithDate, h.neighborStore)).Methods("POST")
 	router.HandleFunc("/auth/events/neighborhood-events", auth.WithJWTAuth(h.handleGetNeighborhoodEvents, h.neighborStore)).Methods("GET")
 	router.HandleFunc("/auth/events/create-event", auth.WithJWTAuth(h.handleCreateEvent, h.neighborStore)).Methods("POST")
 }
@@ -71,6 +72,59 @@ func (h *Handler) handleGetZipcodeEvents(w http.ResponseWriter, r *http.Request)
 	utils.WriteJSON(w, http.StatusOK, events)
 }
 
+func (h *Handler) handleZipcodeEventsWithDate(w http.ResponseWriter, r *http.Request) {
+	neighborId := auth.GetNeighborIdFromContext(r.Context())
+	var eventFilter types.FilterEventPayload
+
+	if err := json.NewDecoder(r.Body).Decode(&eventFilter); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("bad data"))
+		return
+	}
+
+	if err := utils.Validate.Struct(eventFilter); err != nil {
+		errors := err.(validator.ValidationErrors)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid submission for %v", errors))
+		return
+	}
+
+	getNeighbor, err := h.neighborStore.GetNeighborById(neighborId)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+		return
+	}
+
+	if eventFilter.DateFilter == "On" {
+		events, err := h.store.ZipcodeEventsOnDate(getNeighbor.Zipcode, eventFilter.DateTime)
+		if err != nil {
+			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+			return
+		}
+
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(events)
+
+	} else if eventFilter.DateFilter == "Before" {
+		events, err := h.store.ZipcodeEventsBeforeDate(getNeighbor.Zipcode, eventFilter.DateTime)
+		if err != nil {
+			utils.WriteError(w, http.StatusInternalServerError, err)
+			return
+		}
+
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(events)
+
+	} else if eventFilter.DateFilter == "After" {
+		events, err := h.store.ZipcodeEventsAfterDate(getNeighbor.Zipcode, eventFilter.DateTime)
+		if err != nil {
+			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+			return
+		}
+
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(events)
+	}
+}
+
 func (h *Handler) handleGetNeighborhoodEvents(w http.ResponseWriter, r *http.Request) {
 	neighborId := auth.GetNeighborIdFromContext(r.Context())
 
@@ -103,7 +157,7 @@ func (h *Handler) handleGetNeighborhoodEvents(w http.ResponseWriter, r *http.Req
 
 func (h *Handler) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 	neighborId := auth.GetNeighborIdFromContext(r.Context())
-	var event types.EventPayload
+	var event types.CreateEventPayload
 
 	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("bad data"))
