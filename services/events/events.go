@@ -27,8 +27,9 @@ func NewHandler(store types.EventStore, neighborStore types.NeighborStore, zipco
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/events", h.handleGetPublicEvents).Methods("GET")
 	router.HandleFunc("/auth/events", auth.WithJWTAuth(h.handleGetZipcodeEvents, h.neighborStore)).Methods("GET")
-	router.HandleFunc("/auth/events", auth.WithJWTAuth(h.handleZipcodeEventsWithDate, h.neighborStore)).Methods("POST")
-	router.HandleFunc("/auth/events/neighborhood-events", auth.WithJWTAuth(h.handleGetNeighborhoodEvents, h.neighborStore)).Methods("GET")
+	router.HandleFunc("/auth/events/date-filter", auth.WithJWTAuth(h.handleZipcodeEventsWithDate, h.neighborStore)).Methods("POST")
+	router.HandleFunc("/auth/events/location-filter", auth.WithJWTAuth(h.handleEventsWithLocation, h.neighborStore)).Methods("POST")
+	// router.HandleFunc("/auth/events/neighborhood-events", auth.WithJWTAuth(h.handleGetNeighborhoodEvents, h.neighborStore)).Methods("GET")
 	router.HandleFunc("/auth/events/create-event", auth.WithJWTAuth(h.handleCreateEvent, h.neighborStore)).Methods("POST")
 }
 
@@ -74,7 +75,7 @@ func (h *Handler) handleGetZipcodeEvents(w http.ResponseWriter, r *http.Request)
 
 func (h *Handler) handleZipcodeEventsWithDate(w http.ResponseWriter, r *http.Request) {
 	neighborId := auth.GetNeighborIdFromContext(r.Context())
-	var eventFilter types.FilterEventPayload
+	var eventFilter types.DateFilterPayload
 
 	if err := json.NewDecoder(r.Body).Decode(&eventFilter); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("bad data"))
@@ -122,37 +123,59 @@ func (h *Handler) handleZipcodeEventsWithDate(w http.ResponseWriter, r *http.Req
 
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(events)
+	} else {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("bad data"))
+		return
 	}
 }
 
-func (h *Handler) handleGetNeighborhoodEvents(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleEventsWithLocation(w http.ResponseWriter, r *http.Request) {
 	neighborId := auth.GetNeighborIdFromContext(r.Context())
+	var locationFilter types.LocationFilterPayload
 
-	getNeighbor, err := h.neighborStore.GetNeighborById(neighborId)
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+	if err := json.NewDecoder(r.Body).Decode(&locationFilter); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("bad data"))
 		return
 	}
 
-	getZipcodeData, err := h.zipcodeStore.GetZipcodeData(getNeighbor.Zipcode)
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+	if err := utils.Validate.Struct(locationFilter); err != nil {
+		errors := err.(validator.ValidationErrors)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid submission for %v", errors))
 		return
 	}
 
-	location, err := time.LoadLocation(getZipcodeData.Timezone)
-	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not found"))
+	if locationFilter.LocationFilter == "My zipcode" {
+		h.handleGetZipcodeEvents(w, r)
+	} else if locationFilter.LocationFilter == "My neighborhood" {
+		getNeighbor, err := h.neighborStore.GetNeighborById(neighborId)
+		if err != nil {
+			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+			return
+		}
+
+		getZipcodeData, err := h.zipcodeStore.GetZipcodeData(getNeighbor.Zipcode)
+		if err != nil {
+			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+			return
+		}
+
+		location, err := time.LoadLocation(getZipcodeData.Timezone)
+		if err != nil {
+			utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not found"))
+			return
+		}
+
+		events, err := h.store.GetEventsByNeighborhoodId(getNeighbor.NeighborhoodId, time.Now().In(location))
+		if err != nil {
+			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+			return
+		}
+
+		utils.WriteJSON(w, http.StatusOK, events)
+	} else {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("bad data"))
 		return
 	}
-
-	events, err := h.store.GetEventsByNeighborhoodId(getNeighbor.NeighborhoodId, time.Now().In(location))
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
-		return
-	}
-
-	utils.WriteJSON(w, http.StatusOK, events)
 }
 
 func (h *Handler) handleCreateEvent(w http.ResponseWriter, r *http.Request) {

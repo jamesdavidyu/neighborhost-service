@@ -151,7 +151,11 @@ type CreateEventPayload struct {
 	AddressId      int       `json:"addressId"`
 }
 
-type FilterEventPayload struct {
+type LocationFilterPayload struct {
+	LocationFilter string `json:"locationFilter"`
+}
+
+type DateFilterPayload struct {
 	DateFilter string    `json:"dateFilter"`
 	DateTime   time.Time `json:"dateTime"`
 }
