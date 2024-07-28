@@ -52,20 +52,24 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ip := utils.GetLocalIP()
+
 	err = h.store.CreateNeighbor(types.Neighbors{
 		Email:    register.Email,
 		Username: register.Username,
 		Zipcode:  register.Zipcode,
 		Password: string(hashedPassword),
+		Ip:       ip.String(),
 	})
 
 	if err != nil {
 		utils.WriteError(w, http.StatusAlreadyReported, fmt.Errorf("email and/or username taken"))
 		return
+
 	} else {
 		neighbor, err := h.store.GetNeighborWithEmailOrUsername(register.Email)
 		if err != nil {
-			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+			utils.WriteError(w, http.StatusInternalServerError, err)
 			return
 		}
 

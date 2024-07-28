@@ -50,7 +50,7 @@ func (s *APIServer) Run() error {
 	neighborhoodHandler.RegisterRoutes(subrouter)
 
 	addressStore := addressControllers.NewStore(s.db)
-	addressHandler := addressServices.NewHandler(addressStore, neighborStore)
+	addressHandler := addressServices.NewHandler(addressStore, neighborStore, zipcodeStore)
 	addressHandler.RegisterRoutes(subrouter)
 
 	eventStore := eventControllers.NewStore(s.db)

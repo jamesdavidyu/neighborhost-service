@@ -48,13 +48,13 @@ func (h *Handler) handleGetZipcodeEvents(w http.ResponseWriter, r *http.Request)
 
 	getNeighbor, err := h.neighborStore.GetNeighborById(neighborId)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	getZipcodeData, err := h.zipcodeStore.GetZipcodeData(getNeighbor.Zipcode)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -66,7 +66,7 @@ func (h *Handler) handleGetZipcodeEvents(w http.ResponseWriter, r *http.Request)
 
 	events, err := h.store.GetEventsByZipcode(getNeighbor.Zipcode, time.Now().In(location))
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -210,65 +210,36 @@ func (h *Handler) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	validateZipcode, err := h.zipcodeStore.ValidateZipcode(
+	getAddressId, err := h.addressStore.GetAddressIdByAddress(
+		event.Address,
 		event.City,
 		event.State,
 		event.Zipcode,
+		event.Type,
+		neighborId,
 	)
-
-	if validateZipcode.Zipcode == "" {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not found"))
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 		return
-	} else {
-		if err != nil {
-			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
-			return
-		}
-
-		getAddress, err := h.addressStore.GetAddressByNeighborId(neighborId)
-		if err != nil {
-			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
-			return
-		}
-
-		getAddressId, err := h.addressStore.GetAddressIdByAddress(
-			getAddress.FirstName,
-			getAddress.LastName,
-			event.Address,
-			event.City,
-			event.State,
-			event.Zipcode,
-			neighborId,
-		)
-
-		if getAddressId.Id == 0 {
-			utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("first time using address"))
-			return
-		} else {
-			if err != nil {
-				utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
-				return
-			}
-
-			err = h.store.CreateEvent(types.Events{
-				Name:           event.Name,
-				Description:    event.Description,
-				Start:          event.Start,
-				End:            event.End,
-				Reoccurrence:   event.Reoccurrence,
-				ForUnloggedins: event.ForUnloggedins,
-				ForUnverifieds: event.ForUnverifieds,
-				InviteOnly:     event.InviteOnly,
-				HostId:         neighborId,
-				AddressId:      getAddressId.Id,
-			})
-			if err != nil {
-				utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
-				return
-			}
-
-			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode(event)
-		}
 	}
+
+	err = h.store.CreateEvent(types.Events{
+		Name:           event.Name,
+		Description:    event.Description,
+		Start:          event.Start,
+		End:            event.End,
+		Reoccurrence:   event.Reoccurrence,
+		ForUnloggedins: event.ForUnloggedins,
+		ForUnverifieds: event.ForUnverifieds,
+		InviteOnly:     event.InviteOnly,
+		HostId:         neighborId,
+		AddressId:      getAddressId.Id,
+	})
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(event)
 }

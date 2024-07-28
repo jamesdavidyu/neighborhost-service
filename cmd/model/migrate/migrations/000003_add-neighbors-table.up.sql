@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS neighbors (
     zipcode VARCHAR(5) NOT NULL,
     password VARCHAR(255) NOT NULL,
     verified BOOLEAN DEFAULT 'false' NOT NULL,
+    ip VARCHAR(40) NOT NULL,
     neighborhood_id INT DEFAULT 1 NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     /* ip address */

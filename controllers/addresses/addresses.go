@@ -24,16 +24,18 @@ func (s *Store) CreateAddress(address types.Addresses) error {
 			city, 
 			state,
 			zipcode,
+			type,
 			neighbor_id,
 			neighborhood_id
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
 		address.FirstName,
 		address.LastName,
 		address.Address,
 		address.City,
 		address.State,
 		address.Zipcode,
+		address.Type,
 		address.NeighborId,
 		address.NeighborhoodId,
 	)
@@ -45,29 +47,26 @@ func (s *Store) CreateAddress(address types.Addresses) error {
 }
 
 func (s *Store) GetAddressIdByAddress(
-	firstName string,
-	lastName string,
 	address string,
 	city string,
 	state string,
 	zipcode string,
+	Type string,
 	neighborId int,
 ) (*types.Addresses, error) {
 	rows, err := s.db.Query(
 		`SELECT * FROM addresses
-		WHERE first_name = $1
-		AND last_name = $2
-		AND address = $3
-		AND city = $4
-		AND state = $5
-		AND zipcode = $6
-		AND neighbor_id = $7`,
-		firstName,
-		lastName,
+		WHERE address = $1
+		AND city = $2
+		AND state = $3
+		AND zipcode = $4
+		AND type = $5
+		AND neighbor_id = $6`,
 		address,
 		city,
 		state,
 		zipcode,
+		Type,
 		neighborId,
 	)
 	if err != nil {

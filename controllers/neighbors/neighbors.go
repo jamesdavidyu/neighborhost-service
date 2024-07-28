@@ -159,12 +159,13 @@ func (s *Store) UpdatePasswordWithId(neighbor types.Neighbors) error {
 
 func (s *Store) CreateNeighbor(neighbor types.Neighbors) error {
 	_, err := s.db.Exec(
-		`INSERT INTO neighbors (email, username, zipcode, password)
-		VALUES ($1, $2, $3, $4)`,
+		`INSERT INTO neighbors (email, username, zipcode, password, ip)
+		VALUES ($1, $2, $3, $4, $5)`,
 		neighbor.Email,
 		neighbor.Username,
 		neighbor.Zipcode,
 		neighbor.Password,
+		neighbor.Ip,
 	)
 	if err != nil {
 		return err

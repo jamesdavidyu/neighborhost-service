@@ -23,12 +23,11 @@ type AddressStore interface {
 	CreateAddress(Addresses) error
 	GetAddressesByZipcode(zipcode string) (*Addresses, error)
 	GetAddressIdByAddress(
-		firstName string,
-		lastName string,
 		address string,
 		city string,
 		state string,
 		zipcode string,
+		Type string,
 		neighborId int,
 	) (*Addresses, error)
 	GetAddressByNeighborId(id int) (*Addresses, error)
@@ -70,6 +69,7 @@ type Neighbors struct {
 	Zipcode        string    `json:"zipcode"`
 	Password       string    `json:"-"`
 	Verified       bool      `json:"verified"`
+	Ip             string    `json:"ip"`
 	NeighborhoodId int       `json:"neighborhoodId"`
 	CreatedAt      time.Time `json:"createdAt"`
 }
@@ -98,6 +98,7 @@ type Addresses struct {
 	City           string    `json:"city"`
 	State          string    `json:"state"`
 	Zipcode        string    `json:"zipcode"`
+	Type           string    `json:"type"`
 	NeighborId     int       `json:"neighborId"`
 	NeighborhoodId int       `json:"neighborhoodId"`
 	RecordedAt     time.Time `json:"recordedAt"`
@@ -110,6 +111,7 @@ type AddressPayload struct {
 	City           string `json:"city"`
 	State          string `json:"state"`
 	Zipcode        string `json:"zipcode"`
+	Type           string `json:"type"`
 	NeighborId     int    `json:"neighborId"`     // need?
 	NeighborhoodId int    `json:"neighborhoodId"` // need?
 }
@@ -148,6 +150,7 @@ type CreateEventPayload struct {
 	City           string    `json:"city"`
 	State          string    `json:"state"`
 	Zipcode        string    `json:"zipcode"`
+	Type           string    `json:"type"`
 	HostId         int       `json:"hostId"`
 	AddressId      int       `json:"addressId"`
 }
@@ -181,6 +184,7 @@ type EventAddresses struct {
 	City             string    `json:"city"`
 	State            string    `json:"state"`
 	Zipcode          string    `json:"zipcode"`
+	Type             string    `json:"type"`
 	NeighborId       int       `json:"neighborId"`
 	NeighborhoodId   int       `json:"neighborhoodId"`
 	RecordedAt       time.Time `json:"recordedAt"`

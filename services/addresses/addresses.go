@@ -15,14 +15,15 @@ import (
 type Handler struct {
 	store         types.AddressStore
 	neighborStore types.NeighborStore
+	zipcodeStore  types.ZipcodeStore
 }
 
-func NewHandler(store types.AddressStore, neighborStore types.NeighborStore) *Handler {
-	return &Handler{store: store, neighborStore: neighborStore}
+func NewHandler(store types.AddressStore, neighborStore types.NeighborStore, zipcodeStore types.ZipcodeStore) *Handler {
+	return &Handler{store: store, neighborStore: neighborStore, zipcodeStore: zipcodeStore}
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/address", auth.WithJWTAuth(h.handleCreateAddress, h.neighborStore)).Methods("POST")
+	router.HandleFunc("/auth/address", auth.WithJWTAuth(h.handleCreateAddress, h.neighborStore)).Methods("POST")
 }
 
 func (h *Handler) handleCreateAddress(w http.ResponseWriter, r *http.Request) {
@@ -40,38 +41,54 @@ func (h *Handler) handleCreateAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	getNeighbor, err := h.neighborStore.GetNeighborById(neighborId)
+	validateZipcode, err := h.zipcodeStore.ValidateZipcode(
+		address.City,
+		address.State,
+		address.Zipcode,
+	)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 		return
 	}
 
-	if address.Zipcode != getNeighbor.Zipcode {
-		err = h.neighborStore.UpdateZipcodeWithId(types.Neighbors{
-			Zipcode: address.Zipcode,
-			Id:      neighborId,
+	if validateZipcode.Zipcode == "" {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("please double check your city/state/zipcode combination"))
+		return
+	} else {
+		getNeighbor, err := h.neighborStore.GetNeighborById(neighborId)
+		if err != nil {
+			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+			return
+		}
+
+		if address.Zipcode != getNeighbor.Zipcode {
+			err = h.neighborStore.UpdateZipcodeWithId(types.Neighbors{
+				Zipcode: address.Zipcode,
+				Id:      neighborId,
+			})
+			if err != nil {
+				utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+				return
+			}
+		}
+
+		err = h.store.CreateAddress(types.Addresses{
+			FirstName:      address.FirstName,
+			LastName:       address.LastName,
+			Address:        address.Address,
+			City:           address.City,
+			State:          address.State,
+			Zipcode:        address.Zipcode,
+			Type:           address.Type,
+			NeighborId:     neighborId,
+			NeighborhoodId: 1,
 		})
 		if err != nil {
 			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 			return
 		}
-	}
 
-	err = h.store.CreateAddress(types.Addresses{
-		FirstName:      address.FirstName,
-		LastName:       address.LastName,
-		Address:        address.Address,
-		City:           address.City,
-		State:          address.State,
-		Zipcode:        address.Zipcode,
-		NeighborId:     neighborId,
-		NeighborhoodId: getNeighbor.NeighborhoodId,
-	})
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
-		return
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(address) // does this need to return anything?
 	}
-
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(address) // does this need to return anything?
 }

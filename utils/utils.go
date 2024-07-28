@@ -12,6 +12,8 @@ package utils
 import (
 	"database/sql"
 	"encoding/json"
+	"log"
+	"net"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -73,7 +75,7 @@ func ScanRowIntoZipcodes(rows *sql.Rows) (*types.Zipcodes, error) {
 	return zipcodeData, nil
 }
 
-/* 3. FOR NEIGHBORS CONTROLLERS */
+/* 3. FOR NEIGHBORS CONTROLLERS/SERVICES */
 
 func ScanRowIntoNeighbor(rows *sql.Rows) (*types.Neighbors, error) {
 	neighbor := new(types.Neighbors)
@@ -85,6 +87,7 @@ func ScanRowIntoNeighbor(rows *sql.Rows) (*types.Neighbors, error) {
 		&neighbor.Zipcode,
 		&neighbor.Password,
 		&neighbor.Verified,
+		&neighbor.Ip,
 		&neighbor.NeighborhoodId,
 		&neighbor.CreatedAt,
 	)
@@ -93,6 +96,18 @@ func ScanRowIntoNeighbor(rows *sql.Rows) (*types.Neighbors, error) {
 	}
 
 	return neighbor, nil
+}
+
+func GetLocalIP() net.IP {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	localAddress := conn.LocalAddr().(*net.UDPAddr)
+
+	return localAddress.IP
 }
 
 /* 4. FOR ADDRESSES CONTROLLERS */
@@ -108,6 +123,7 @@ func ScanRowIntoAddresses(rows *sql.Rows) (*types.Addresses, error) {
 		&addresses.City,
 		&addresses.State,
 		&addresses.Zipcode,
+		&addresses.Type,
 		&addresses.NeighborId,
 		&addresses.NeighborhoodId,
 		&addresses.RecordedAt,
@@ -185,6 +201,7 @@ func ScanRowIntoNeighborEvents(rows *sql.Rows) (*types.EventAddresses, error) {
 		&events.City,
 		&events.State,
 		&events.Zipcode,
+		&events.Type,
 		&events.NeighborId,
 		&events.NeighborhoodId,
 		&events.RecordedAt,
