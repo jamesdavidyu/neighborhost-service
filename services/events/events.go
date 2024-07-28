@@ -95,7 +95,7 @@ func (h *Handler) handleZipcodeEventsWithDate(w http.ResponseWriter, r *http.Req
 	}
 
 	if eventFilter.DateFilter == "On" {
-		events, err := h.store.ZipcodeEventsOnDate(getNeighbor.Zipcode, eventFilter.DateTime)
+		events, err := h.store.GetZipcodeEventsOnDate(getNeighbor.Zipcode, eventFilter.DateTime)
 		if err != nil {
 			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 			return
@@ -105,7 +105,7 @@ func (h *Handler) handleZipcodeEventsWithDate(w http.ResponseWriter, r *http.Req
 		json.NewEncoder(w).Encode(events)
 
 	} else if eventFilter.DateFilter == "Before" {
-		events, err := h.store.ZipcodeEventsBeforeDate(getNeighbor.Zipcode, eventFilter.DateTime)
+		events, err := h.store.GetZipcodeEventsBeforeDate(getNeighbor.Zipcode, eventFilter.DateTime)
 		if err != nil {
 			utils.WriteError(w, http.StatusInternalServerError, err)
 			return
@@ -115,7 +115,7 @@ func (h *Handler) handleZipcodeEventsWithDate(w http.ResponseWriter, r *http.Req
 		json.NewEncoder(w).Encode(events)
 
 	} else if eventFilter.DateFilter == "After" {
-		events, err := h.store.ZipcodeEventsAfterDate(getNeighbor.Zipcode, eventFilter.DateTime)
+		events, err := h.store.GetZipcodeEventsAfterDate(getNeighbor.Zipcode, eventFilter.DateTime)
 		if err != nil {
 			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 			return
@@ -144,27 +144,28 @@ func (h *Handler) handleEventsWithLocation(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	getNeighbor, err := h.neighborStore.GetNeighborById(neighborId)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+		return
+	}
+
+	getZipcodeData, err := h.zipcodeStore.GetZipcodeData(getNeighbor.Zipcode)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+		return
+	}
+
+	location, err := time.LoadLocation(getZipcodeData.Timezone)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not found"))
+		return
+	}
+
 	if locationFilter.LocationFilter == "My zipcode" {
 		h.handleGetZipcodeEvents(w, r)
+
 	} else if locationFilter.LocationFilter == "My neighborhood" {
-		getNeighbor, err := h.neighborStore.GetNeighborById(neighborId)
-		if err != nil {
-			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
-			return
-		}
-
-		getZipcodeData, err := h.zipcodeStore.GetZipcodeData(getNeighbor.Zipcode)
-		if err != nil {
-			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
-			return
-		}
-
-		location, err := time.LoadLocation(getZipcodeData.Timezone)
-		if err != nil {
-			utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not found"))
-			return
-		}
-
 		events, err := h.store.GetEventsByNeighborhoodId(getNeighbor.NeighborhoodId, time.Now().In(location))
 		if err != nil {
 			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
@@ -172,6 +173,22 @@ func (h *Handler) handleEventsWithLocation(w http.ResponseWriter, r *http.Reques
 		}
 
 		utils.WriteJSON(w, http.StatusOK, events)
+
+	} else if locationFilter.LocationFilter == "My city" {
+		getAddress, err := h.addressStore.GetAddressByNeighborId(neighborId)
+		if err != nil {
+			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+			return
+		}
+
+		events, err := h.store.GetEventsByCity(getAddress.City, getAddress.State, getAddress.Zipcode, time.Now().In(location))
+		if err != nil {
+			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+			return
+		}
+
+		utils.WriteJSON(w, http.StatusOK, events)
+
 	} else {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("bad data"))
 		return

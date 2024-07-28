@@ -36,11 +36,12 @@ type AddressStore interface {
 
 type EventStore interface {
 	GetPublicEvents() ([]Events, error)
-	GetEventsByZipcode(zipcode string, start time.Time) ([]EventAddresses, error)
-	ZipcodeEventsOnDate(zipcode string, dateTime time.Time) ([]EventAddresses, error)
-	ZipcodeEventsBeforeDate(zipcode string, dateTime time.Time) ([]EventAddresses, error)
-	ZipcodeEventsAfterDate(zipcode string, dateTime time.Time) ([]EventAddresses, error)
-	GetEventsByNeighborhoodId(id int, start time.Time) ([]EventAddresses, error)
+	GetEventsByZipcode(zipcode string, dateTime time.Time) ([]EventAddresses, error)
+	GetZipcodeEventsOnDate(zipcode string, dateTime time.Time) ([]EventAddresses, error)
+	GetZipcodeEventsBeforeDate(zipcode string, dateTime time.Time) ([]EventAddresses, error)
+	GetZipcodeEventsAfterDate(zipcode string, dateTime time.Time) ([]EventAddresses, error)
+	GetEventsByNeighborhoodId(id int, dateTime time.Time) ([]EventAddresses, error)
+	GetEventsByCity(city string, state string, zipcode string, dateTime time.Time) ([]EventAddresses, error)
 	CreateEvent(Events) error
 }
 

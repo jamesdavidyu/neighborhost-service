@@ -2,6 +2,8 @@
 1. PUBLIC
 2. ZIPCODE
 3. NEIGHBORHOOD
+4. CITY
+5. GENERAL
 */
 
 package events
@@ -48,12 +50,12 @@ func (s *Store) GetPublicEvents() ([]types.Events, error) {
 
 /* 2. ZIPCODE */
 
-func (s *Store) GetEventsByZipcode(zipcode string, start time.Time) ([]types.EventAddresses, error) {
+func (s *Store) GetEventsByZipcode(zipcode string, dateTime time.Time) ([]types.EventAddresses, error) {
 	rows, err := s.db.Query(
 		`SELECT * FROM events e
 		LEFT OUTER JOIN addresses a ON a.id = e.address_id
 		WHERE a.zipcode = $1
-		AND start >= $2`, zipcode, start,
+		AND start >= $2`, zipcode, dateTime,
 	)
 	if err != nil {
 		return nil, err
@@ -71,7 +73,7 @@ func (s *Store) GetEventsByZipcode(zipcode string, start time.Time) ([]types.Eve
 	return events, nil
 }
 
-func (s *Store) ZipcodeEventsOnDate(zipcode string, dateTime time.Time) ([]types.EventAddresses, error) {
+func (s *Store) GetZipcodeEventsOnDate(zipcode string, dateTime time.Time) ([]types.EventAddresses, error) {
 	rows, err := s.db.Query(
 		`SELECT * FROM events e
 		LEFT OUTER JOIN addresses a ON a.id = e.address_id
@@ -94,7 +96,7 @@ func (s *Store) ZipcodeEventsOnDate(zipcode string, dateTime time.Time) ([]types
 	return events, nil
 }
 
-func (s *Store) ZipcodeEventsBeforeDate(zipcode string, dateTime time.Time) ([]types.EventAddresses, error) {
+func (s *Store) GetZipcodeEventsBeforeDate(zipcode string, dateTime time.Time) ([]types.EventAddresses, error) {
 	rows, err := s.db.Query(
 		`SELECT * FROM events e
 		LEFT OUTER JOIN addresses a ON a.id = e.address_id
@@ -117,7 +119,7 @@ func (s *Store) ZipcodeEventsBeforeDate(zipcode string, dateTime time.Time) ([]t
 	return events, nil
 }
 
-func (s *Store) ZipcodeEventsAfterDate(zipcode string, dateTime time.Time) ([]types.EventAddresses, error) {
+func (s *Store) GetZipcodeEventsAfterDate(zipcode string, dateTime time.Time) ([]types.EventAddresses, error) {
 	rows, err := s.db.Query(
 		`SELECT * FROM events e
 		LEFT OUTER JOIN addresses a ON a.id = e.address_id
@@ -142,12 +144,12 @@ func (s *Store) ZipcodeEventsAfterDate(zipcode string, dateTime time.Time) ([]ty
 
 /* 3. NEIGHBORHOOD */
 
-func (s *Store) GetEventsByNeighborhoodId(id int, start time.Time) ([]types.EventAddresses, error) {
+func (s *Store) GetEventsByNeighborhoodId(id int, dateTime time.Time) ([]types.EventAddresses, error) {
 	rows, err := s.db.Query(
 		`SELECT * FROM events e
 		LEFT OUTER JOIN addresses a ON a.id = e.address_id
 		WHERE a.neighborhood_id = $1
-		AND start >= $2`, id, start,
+		AND start >= $2`, id, dateTime,
 	)
 	if err != nil {
 		return nil, err
@@ -164,6 +166,33 @@ func (s *Store) GetEventsByNeighborhoodId(id int, start time.Time) ([]types.Even
 
 	return events, nil
 }
+
+/* 4. CITY */
+
+func (s *Store) GetEventsByCity(city string, state string, zipcode string, dateTime time.Time) ([]types.EventAddresses, error) {
+	rows, err := s.db.Query(
+		`SELECT * FROM events e
+		LEFT OUTER JOIN addresses a ON a.id = e.address_id
+		WHERE a.city = $1 AND a.state = $2 AND a.zipcode = $3
+		AND start >= $4`, city, state, zipcode, dateTime,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	events := make([]types.EventAddresses, 0)
+	for rows.Next() {
+		event, err := utils.ScanRowIntoNeighborEvents(rows)
+		if err != nil {
+			return nil, err
+		}
+		events = append(events, *event)
+	}
+
+	return events, nil
+}
+
+/* 5. GENERAL */
 
 func (s *Store) CreateEvent(event types.Events) error {
 	_, err := s.db.Exec(
