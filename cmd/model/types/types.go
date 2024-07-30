@@ -39,8 +39,12 @@ type EventStore interface {
 	GetZipcodeEventsOnDate(zipcode string, dateTime time.Time) ([]EventAddresses, error)
 	GetZipcodeEventsBeforeDate(zipcode string, dateTime time.Time) ([]EventAddresses, error)
 	GetZipcodeEventsAfterDate(zipcode string, dateTime time.Time) ([]EventAddresses, error)
-	GetEventsByNeighborhoodId(id int, dateTime time.Time) ([]EventAddresses, error)
+	GetEventsByNeighborhoodId(neighborhood_id int, dateTime time.Time) ([]EventAddresses, error)
+	GetNeighborhoodEventsOnDate(neighborhood_id int, dateTime time.Time) ([]EventAddresses, error)
+	GetNeighborhoodEventsBeforeDate(neighborhood_id int, dateTime time.Time) ([]EventAddresses, error)
+	GetNeighborhoodEventsAfterDate(neighborhood_id int, dateTime time.Time) ([]EventAddresses, error)
 	GetEventsByCity(city string, state string, zipcode string, dateTime time.Time) ([]EventAddresses, error)
+	GetAllEvents(dateTime time.Time) ([]EventAddresses, error)
 	CreateEvent(Events) error
 }
 
