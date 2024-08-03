@@ -91,6 +91,27 @@ func (s *Store) GetAddressIdByAddress(
 func (s *Store) GetAddressByNeighborId(id int) (*types.Addresses, error) {
 	rows, err := s.db.Query(
 		`SELECT * FROM addresses
+		WHERE neighbor_id = $1
+		AND type = "Home"`, id,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	addresses := new(types.Addresses)
+	for rows.Next() {
+		addresses, err = utils.ScanRowIntoAddresses(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return addresses, nil
+}
+
+func (s *Store) GetAddressesByNeighborId(id int) (*types.Addresses, error) {
+	rows, err := s.db.Query(
+		`SELECT * FROM addresses
 		WHERE neighbor_id = $1`, id,
 	)
 	if err != nil {

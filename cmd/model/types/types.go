@@ -31,6 +31,7 @@ type AddressStore interface {
 		neighborId int,
 	) (*Addresses, error)
 	GetAddressByNeighborId(id int) (*Addresses, error)
+	GetAddressesByNeighborId(id int) (*Addresses, error)
 }
 
 type EventStore interface {
@@ -44,7 +45,10 @@ type EventStore interface {
 	GetNeighborhoodEventsBeforeDate(neighborhood_id int, dateTime time.Time) ([]EventAddresses, error)
 	GetNeighborhoodEventsAfterDate(neighborhood_id int, dateTime time.Time) ([]EventAddresses, error)
 	GetEventsByCity(city string, state string, zipcode string, dateTime time.Time) ([]EventAddresses, error)
-	GetAllEvents(dateTime time.Time) ([]EventAddresses, error)
+	GetCityEventsOnDate(city string, state string, zipcode string, dateTime time.Time) ([]EventAddresses, error)
+	GetCityEventsBeforeDate(city string, state string, zipcode string, dateTime time.Time) ([]EventAddresses, error)
+	GetCityEventsAfterDate(city string, state string, zipcode string, dateTime time.Time) ([]EventAddresses, error)
+	// GetAllEvents(dateTime time.Time) ([]EventAddresses, error)
 	CreateEvent(Events) error
 }
 
@@ -166,6 +170,12 @@ type LocationFilterPayload struct {
 type DateFilterPayload struct {
 	DateFilter string    `json:"dateFilter"`
 	DateTime   time.Time `json:"dateTime"`
+}
+
+type LocationDateFilterPayload struct {
+	LocationFilter string    `json:"locationFilter"`
+	DateFilter     string    `json:"dateFilter"`
+	DateTime       time.Time `json:"dateTime"`
 }
 
 type EventAddresses struct {

@@ -26,11 +26,11 @@ func NewHandler(store types.EventStore, neighborStore types.NeighborStore, zipco
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/events", h.handleGetPublicEvents).Methods("GET")
-	router.HandleFunc("/auth/events", auth.WithJWTAuth(h.handleGetZipcodeEvents, h.neighborStore)).Methods("GET")
-	router.HandleFunc("/auth/events/date-filter", auth.WithJWTAuth(h.handleZipcodeEventsWithDate, h.neighborStore)).Methods("POST")
-	router.HandleFunc("/auth/events/location-filter", auth.WithJWTAuth(h.handleEventsWithLocation, h.neighborStore)).Methods("POST")
-	router.HandleFunc("/auth/events/neighborhood-events/date-filter", auth.WithJWTAuth(h.handleNeighborhoodEventsWithDate, h.neighborStore)).Methods("POST")
-	router.HandleFunc("/auth/events/create-event", auth.WithJWTAuth(h.handleCreateEvent, h.neighborStore)).Methods("POST")
+	router.HandleFunc("/events/auth", auth.WithJWTAuth(h.handleGetZipcodeEvents, h.neighborStore)).Methods("GET")
+	router.HandleFunc("/events/location-filter/auth", auth.WithJWTAuth(h.handleEventsWithLocation, h.neighborStore)).Methods("POST")
+	router.HandleFunc("/events/date-filter/auth", auth.WithJWTAuth(h.handleZipcodeEventsWithDate, h.neighborStore)).Methods("POST")
+	router.HandleFunc("/events/location-date-filter/auth", auth.WithJWTAuth(h.handleLocationEventsWithDate, h.neighborStore)).Methods("POST")
+	router.HandleFunc("/events/create-event/auth", auth.WithJWTAuth(h.handleCreateEvent, h.neighborStore)).Methods("POST")
 }
 
 func (h *Handler) handleGetPublicEvents(w http.ResponseWriter, r *http.Request) {
@@ -185,7 +185,7 @@ func (h *Handler) handleEventsWithLocation(w http.ResponseWriter, r *http.Reques
 		utils.WriteJSON(w, http.StatusOK, events)
 
 	} else if locationFilter.LocationFilter == "My city" {
-		getAddress, err := h.addressStore.GetAddressByNeighborId(neighborId)
+		getAddress, err := h.addressStore.GetAddressByNeighborId(neighborId) // this will need to get fixed to specify home address
 		if err != nil {
 			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 			return
@@ -200,13 +200,13 @@ func (h *Handler) handleEventsWithLocation(w http.ResponseWriter, r *http.Reques
 		utils.WriteJSON(w, http.StatusOK, events)
 
 	} else if locationFilter.LocationFilter == "All" {
-		events, err := h.store.GetAllEvents(time.Now().In(location))
-		if err != nil {
-			utils.WriteError(w, http.StatusInternalServerError, err)
-			return
-		}
+		// events, err := h.store.GetAllEvents(time.Now().In(location))
+		// if err != nil {
+		// 	utils.WriteError(w, http.StatusInternalServerError, err)
+		// 	return
+		// }
 
-		utils.WriteJSON(w, http.StatusOK, events)
+		// utils.WriteJSON(w, http.StatusOK, events)
 
 	} else {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("bad data"))
@@ -214,16 +214,16 @@ func (h *Handler) handleEventsWithLocation(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (h *Handler) handleNeighborhoodEventsWithDate(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleLocationEventsWithDate(w http.ResponseWriter, r *http.Request) {
 	neighborId := auth.GetNeighborIdFromContext(r.Context())
-	var dateFilter types.DateFilterPayload
+	var locationDateFilter types.LocationDateFilterPayload
 
-	if err := json.NewDecoder(r.Body).Decode(&dateFilter); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&locationDateFilter); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("bad data"))
 		return
 	}
 
-	if err := utils.Validate.Struct(dateFilter); err != nil {
+	if err := utils.Validate.Struct(locationDateFilter); err != nil {
 		errors := err.(validator.ValidationErrors)
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid submission for %v", errors))
 		return
@@ -247,33 +247,80 @@ func (h *Handler) handleNeighborhoodEventsWithDate(w http.ResponseWriter, r *htt
 		return
 	}
 
-	if dateFilter.DateFilter == "On" {
-		events, err := h.store.GetNeighborhoodEventsOnDate(getNeighbor.NeighborhoodId, dateFilter.DateTime.In(location))
+	if locationDateFilter.LocationFilter == "My zipcode" {
+		h.handleZipcodeEventsWithDate(w, r)
+
+	} else if locationDateFilter.LocationFilter == "My neighborhood" {
+		if locationDateFilter.DateFilter == "On" {
+			events, err := h.store.GetNeighborhoodEventsOnDate(getNeighbor.NeighborhoodId, locationDateFilter.DateTime.In(location))
+			if err != nil {
+				utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+				return
+			}
+
+			utils.WriteJSON(w, http.StatusOK, events)
+
+		} else if locationDateFilter.DateFilter == "Before" {
+			events, err := h.store.GetNeighborhoodEventsBeforeDate(getNeighbor.NeighborhoodId, locationDateFilter.DateTime.In(location))
+			if err != nil {
+				utils.WriteError(w, http.StatusInternalServerError, err)
+				return
+			}
+
+			utils.WriteJSON(w, http.StatusOK, events)
+
+		} else if locationDateFilter.DateFilter == "After" {
+			events, err := h.store.GetNeighborhoodEventsAfterDate(getNeighbor.NeighborhoodId, locationDateFilter.DateTime.In(location))
+			if err != nil {
+				utils.WriteError(w, http.StatusInternalServerError, err)
+				return
+			}
+
+			utils.WriteJSON(w, http.StatusOK, events)
+
+		} else {
+			utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("bad data"))
+			return
+		}
+
+	} else if locationDateFilter.LocationFilter == "My city" {
+		getAddress, err := h.addressStore.GetAddressByNeighborId(neighborId)
 		if err != nil {
 			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 			return
 		}
 
-		utils.WriteJSON(w, http.StatusOK, events)
+		if locationDateFilter.DateFilter == "On" {
+			events, err := h.store.GetCityEventsOnDate(getAddress.City, getAddress.State, getAddress.Zipcode, locationDateFilter.DateTime.In(location))
+			if err != nil {
+				utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+				return
+			}
 
-	} else if dateFilter.DateFilter == "Before" {
-		events, err := h.store.GetNeighborhoodEventsBeforeDate(getNeighbor.NeighborhoodId, dateFilter.DateTime.In(location))
-		if err != nil {
-			utils.WriteError(w, http.StatusInternalServerError, err)
+			utils.WriteJSON(w, http.StatusOK, events)
+
+		} else if locationDateFilter.DateFilter == "Before" {
+			events, err := h.store.GetCityEventsBeforeDate(getAddress.City, getAddress.State, getAddress.Zipcode, locationDateFilter.DateTime.In(location))
+			if err != nil {
+				utils.WriteError(w, http.StatusInternalServerError, err)
+				return
+			}
+
+			utils.WriteJSON(w, http.StatusOK, events)
+
+		} else if locationDateFilter.DateFilter == "After" {
+			events, err := h.store.GetCityEventsAfterDate(getAddress.City, getAddress.State, getAddress.Zipcode, locationDateFilter.DateTime.In(location))
+			if err != nil {
+				utils.WriteError(w, http.StatusInternalServerError, err)
+				return
+			}
+
+			utils.WriteJSON(w, http.StatusOK, events)
+
+		} else {
+			utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("bad data"))
 			return
 		}
-
-		utils.WriteJSON(w, http.StatusOK, events)
-
-	} else if dateFilter.DateFilter == "After" {
-		events, err := h.store.GetNeighborhoodEventsAfterDate(getNeighbor.NeighborhoodId, dateFilter.DateTime.In(location))
-		if err != nil {
-			utils.WriteError(w, http.StatusInternalServerError, err)
-			return
-		}
-
-		utils.WriteJSON(w, http.StatusOK, events)
-
 	} else {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("bad data"))
 		return

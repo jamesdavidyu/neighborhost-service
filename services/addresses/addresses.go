@@ -23,7 +23,19 @@ func NewHandler(store types.AddressStore, neighborStore types.NeighborStore, zip
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/auth/address", auth.WithJWTAuth(h.handleCreateAddress, h.neighborStore)).Methods("POST")
+	router.HandleFunc("/addresses/auth", auth.WithJWTAuth(h.handleGetAddresses, h.neighborStore)).Methods("GET")
+	router.HandleFunc("/address/auth", auth.WithJWTAuth(h.handleCreateAddress, h.neighborStore)).Methods("POST")
+}
+
+func (h *Handler) handleGetAddresses(w http.ResponseWriter, r *http.Request) {
+	neighborId := auth.GetNeighborIdFromContext(r.Context())
+	addresses, err := h.store.GetAddressesByNeighborId(neighborId)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, addresses)
 }
 
 func (h *Handler) handleCreateAddress(w http.ResponseWriter, r *http.Request) {
