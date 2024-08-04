@@ -232,16 +232,25 @@ func ScanRowIntoFriends(rows *sql.Rows) (*types.Friends, error) {
 	return friends, nil
 }
 
-func ScanRowIntoFriendRequests(rows *sql.Rows) (*types.FriendRequests, error) {
-	friends := new(types.FriendRequests)
+func ScanRowIntoFriendRequests(rows *sql.Rows) (*types.PendingFriendRequests, error) {
+	friends := new(types.PendingFriendRequests)
 
 	err := rows.Scan(
-		&friends.Id,
+		&friends.FriendRequestId,
 		&friends.NeighborId,
-		&friends.RequestingFriendId,
+		&friends.RequestedFriendId,
 		&friends.Status,
 		&friends.FriendRequestedAt,
-	)
+		&friends.Id,
+		&friends.Email,
+		&friends.Username,
+		&friends.Zipcode,
+		&friends.Password,
+		&friends.Verified,
+		&friends.Ip,
+		&friends.NeighborhoodId,
+		&friends.CreatedAt,
+	) // need all these rows?
 	if err != nil {
 		return nil, err
 	}

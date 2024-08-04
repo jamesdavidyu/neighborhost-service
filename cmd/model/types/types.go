@@ -54,8 +54,10 @@ type EventStore interface {
 
 type FriendStore interface {
 	GetFriendsByNeighborId(neighborId int) ([]Friends, error)
-	GetFriendRequestsByNeighborId(neighborId int) ([]FriendRequests, error)
+	GetFriendRequestsByNeighborId(requestedFriendId int) ([]PendingFriendRequests, error)
 	CreateFriendRequest(FriendRequests) error
+	UpdateFriendRequest(FriendRequests) error
+	CreateFriend(Friends) error
 }
 
 type ProfileStore interface {
@@ -336,9 +338,26 @@ type Friends struct {
 }
 
 type FriendRequests struct {
-	Id                 int       `json:"id"`
-	NeighborId         int       `json:"neighborId"`
-	RequestingFriendId int       `json:"requestingFriendId"`
-	Status             string    `json:"status"`
-	FriendRequestedAt  time.Time `json:"friendRequestedAt"`
+	Id                int       `json:"id"`
+	NeighborId        int       `json:"neighborId"`
+	RequestedFriendId int       `json:"requestedFriendId"`
+	Status            string    `json:"status"`
+	FriendRequestedAt time.Time `json:"friendRequestedAt"`
+}
+
+type PendingFriendRequests struct {
+	FriendRequestId   int       `json:"friendRequestId"`
+	NeighborId        int       `json:"neighborId"`
+	RequestedFriendId int       `json:"requestedFriendId"`
+	Status            string    `json:"status"`
+	FriendRequestedAt time.Time `json:"friendRequestedAt"`
+	Id                int       `json:"id"`
+	Email             string    `json:"email"`
+	Username          string    `json:"username"`
+	Zipcode           string    `json:"zipcode"`
+	Password          string    `json:"-"`
+	Verified          bool      `json:"verified"`
+	Ip                string    `json:"ip"`
+	NeighborhoodId    int       `json:"neighborhoodId"`
+	CreatedAt         time.Time `json:"createdAt"`
 }
