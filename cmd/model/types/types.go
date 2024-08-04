@@ -40,16 +40,26 @@ type EventStore interface {
 	GetZipcodeEventsOnDate(zipcode string, dateTime time.Time) ([]EventAddresses, error)
 	GetZipcodeEventsBeforeDate(zipcode string, dateTime time.Time) ([]EventAddresses, error)
 	GetZipcodeEventsAfterDate(zipcode string, dateTime time.Time) ([]EventAddresses, error)
-	GetEventsByNeighborhoodId(neighborhood_id int, dateTime time.Time) ([]EventAddresses, error)
-	GetNeighborhoodEventsOnDate(neighborhood_id int, dateTime time.Time) ([]EventAddresses, error)
-	GetNeighborhoodEventsBeforeDate(neighborhood_id int, dateTime time.Time) ([]EventAddresses, error)
-	GetNeighborhoodEventsAfterDate(neighborhood_id int, dateTime time.Time) ([]EventAddresses, error)
+	GetEventsByNeighborhoodId(neighborhoodId int, dateTime time.Time) ([]EventAddresses, error)
+	GetNeighborhoodEventsOnDate(neighborhoodId int, dateTime time.Time) ([]EventAddresses, error)
+	GetNeighborhoodEventsBeforeDate(neighborhoodId int, dateTime time.Time) ([]EventAddresses, error)
+	GetNeighborhoodEventsAfterDate(neighborhoodId int, dateTime time.Time) ([]EventAddresses, error)
 	GetEventsByCity(city string, state string, zipcode string, dateTime time.Time) ([]EventAddresses, error)
 	GetCityEventsOnDate(city string, state string, zipcode string, dateTime time.Time) ([]EventAddresses, error)
 	GetCityEventsBeforeDate(city string, state string, zipcode string, dateTime time.Time) ([]EventAddresses, error)
 	GetCityEventsAfterDate(city string, state string, zipcode string, dateTime time.Time) ([]EventAddresses, error)
 	// GetAllEvents(dateTime time.Time) ([]EventAddresses, error)
 	CreateEvent(Events) error
+}
+
+type FriendStore interface {
+	GetFriendsByNeighborId(neighborId int) ([]Friends, error)
+	GetFriendRequestsByNeighborId(neighborId int) ([]FriendRequests, error)
+	CreateFriendRequest(FriendRequests) error
+}
+
+type ProfileStore interface {
+	GetProfileByNeighborId(neighborId int) (*Profiles, error)
 }
 
 type NeighborhoodStore interface {
@@ -80,6 +90,7 @@ type Neighbors struct {
 	Ip             string    `json:"ip"`
 	NeighborhoodId int       `json:"neighborhoodId"`
 	CreatedAt      time.Time `json:"createdAt"`
+	// role
 }
 
 type Register struct {
@@ -125,9 +136,114 @@ type AddressPayload struct {
 }
 
 type Profiles struct {
-	Id         int `json:"id"`
-	NeighborId int `json:"neighborId"`
-	// demographic fields... bio, race, age
+	NeighborId               int       `json:"id"`
+	Bio                      string    `json:"bio"`
+	DateOfBirth              time.Time `json:"dateOfBirth"`
+	DateOfBirthPublic        bool      `json:"dateOfBirthPublic"`
+	Gender                   string    `json:"gender"`
+	GenderPublic             bool      `json:"genderPublic"`
+	Race                     string    `json:"race"`
+	RacePublic               bool      `json:"racePublic"`
+	Ethnicity                string    `json:"ethnicity"`
+	EthnicityPublic          bool      `json:"ethnicityPublic"`
+	RelationshipStatus       string    `json:"relationshipStatus"`
+	RelationshipStatusPublic bool      `json:"relationshipStatusPublic"`
+	Religion                 string    `json:"religion"`
+	ReligionPublic           bool      `json:"religionPublic"`
+	Politics                 string    `json:"politics"`
+	PoliticsPublic           bool      `json:"politicsPublic"`
+}
+
+type Bios struct {
+	Id         int       `json:"id"`
+	NeighborId int       `json:"neighborId"`
+	Bio        string    `json:"bio"`
+	CreatedAt  time.Time `json:"createdAt"`
+}
+
+type DatesOfBirth struct {
+	Id          int       `json:"id"`
+	NeighborId  int       `json:"neighborId"`
+	DateOfBirth time.Time `json:"dateOfBirth"`
+	Public      bool      `json:"public"`
+	RecordedAt  time.Time `json:"recordedAt"`
+}
+
+type Genders struct {
+	Id         int       `json:"id"`
+	NeighborId int       `json:"neighborId"`
+	Gender     string    `json:"gender"`
+	Public     bool      `json:"public"`
+	RecordedAt time.Time `json:"recordedAt"`
+}
+
+type Races struct {
+	Id         int       `json:"id"`
+	NeighborId int       `json:"neighborId"`
+	Race       string    `json:"race"`
+	Public     bool      `json:"public"`
+	RecordedAt time.Time `json:"recordedAt"`
+}
+
+type Ethnicities struct {
+	Id         int       `json:"id"`
+	NeighborId int       `json:"neighborId"`
+	Ethnicity  string    `json:"ethnicity"`
+	Public     bool      `json:"public"`
+	RecordedAt time.Time `json:"recordedAt"`
+}
+
+type RelationshipStatuses struct {
+	Id                 int       `json:"id"`
+	NeighborId         int       `json:"neighborId"`
+	RelationshipStatus string    `json:"relationshipStatus"`
+	Public             bool      `json:"public"`
+	RecordedAt         time.Time `json:"recordedAt"`
+}
+
+type Religions struct {
+	Id         int       `json:"id"`
+	NeighborId int       `json:"neighborId"`
+	Religion   string    `json:"religion"`
+	Public     bool      `json:"public"`
+	RecordedAt time.Time `json:"recordedAt"`
+}
+
+type Politics struct {
+	Id         int       `json:"id"`
+	NeighborId int       `json:"neighborId"`
+	Politics   string    `json:"politics"`
+	Public     bool      `json:"public"`
+	RecordedAt time.Time `json:"recordedAt"`
+}
+
+type Education struct {
+	Id         int       `json:"id"`
+	NeighborId int       `json:"neighborId"`
+	School     string    `json:"school"`
+	Degree     string    `json:"degree"`
+	Start      time.Time `json:"start"`
+	End        time.Time `json:"end"`
+	Public     bool      `json:"public"`
+	RecordedAt time.Time `json:"recordedAt"`
+}
+
+type Occupations struct {
+	Id         int       `json:"id"`
+	NeighborId int       `json:"neighborId"`
+	Role       string    `json:"role"`
+	Employer   string    `json:"employer"`
+	Start      time.Time `json:"start"`
+	End        time.Time `json:"end"`
+	Public     bool      `json:"public"`
+	RecordedAt time.Time `json:"recordedAt"`
+}
+
+type Interests struct {
+	Id         int       `json:"id"`
+	NeighborId int       `json:"neighborId"`
+	Interest   string    `json:"interest"`
+	RecordedAt time.Time `json:"recordedAt"`
 }
 
 type Events struct {
@@ -143,6 +259,7 @@ type Events struct {
 	HostId         int       `json:"hostId"`
 	AddressId      int       `json:"addressId"`
 	CreatedAt      time.Time `json:"createdAt"`
+	// add category
 }
 
 type CreateEventPayload struct {
@@ -222,5 +339,6 @@ type FriendRequests struct {
 	Id                 int       `json:"id"`
 	NeighborId         int       `json:"neighborId"`
 	RequestingFriendId int       `json:"requestingFriendId"`
+	Status             string    `json:"status"`
 	FriendRequestedAt  time.Time `json:"friendRequestedAt"`
 }

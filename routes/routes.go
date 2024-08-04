@@ -10,11 +10,13 @@ import (
 	"github.com/gorilla/mux"
 	addressControllers "github.com/jamesdavidyu/neighborhost-service/controllers/addresses"
 	eventControllers "github.com/jamesdavidyu/neighborhost-service/controllers/events"
+	friendControllers "github.com/jamesdavidyu/neighborhost-service/controllers/friends"
 	neighborhoodControllers "github.com/jamesdavidyu/neighborhost-service/controllers/neighborhoods"
 	neighborControllers "github.com/jamesdavidyu/neighborhost-service/controllers/neighbors"
 	"github.com/jamesdavidyu/neighborhost-service/controllers/zipcodes"
 	addressServices "github.com/jamesdavidyu/neighborhost-service/services/addresses"
 	eventServices "github.com/jamesdavidyu/neighborhost-service/services/events"
+	friendServices "github.com/jamesdavidyu/neighborhost-service/services/friends"
 	neighborhoodServices "github.com/jamesdavidyu/neighborhost-service/services/neighborhoods"
 	neighborServices "github.com/jamesdavidyu/neighborhost-service/services/neighbors"
 	"github.com/jamesdavidyu/neighborhost-service/utils"
@@ -56,6 +58,10 @@ func (s *APIServer) Run() error {
 	eventStore := eventControllers.NewStore(s.db)
 	eventHandler := eventServices.NewHandler(eventStore, neighborStore, zipcodeStore, addressStore)
 	eventHandler.RegisterRoutes(subrouter)
+
+	friendStore := friendControllers.NewStore(s.db)
+	friendHandler := friendServices.NewHandler(friendStore, neighborStore)
+	friendHandler.RegisterRoutes(subrouter)
 
 	if Port == "" {
 		Port = "8080"

@@ -151,13 +151,13 @@ func (s *Store) GetZipcodeEventsAfterDate(zipcode string, dateTime time.Time) ([
 
 /* 3. NEIGHBORHOOD */
 
-func (s *Store) GetEventsByNeighborhoodId(neighborhood_id int, dateTime time.Time) ([]types.EventAddresses, error) {
+func (s *Store) GetEventsByNeighborhoodId(neighborhoodId int, dateTime time.Time) ([]types.EventAddresses, error) {
 	rows, err := s.db.Query(
 		`SELECT * FROM events e
 		LEFT OUTER JOIN addresses a ON a.id = e.address_id
 		WHERE a.neighborhood_id = $1
 		AND start >= $2
-		ORDER BY start`, neighborhood_id, dateTime,
+		ORDER BY start`, neighborhoodId, dateTime,
 	)
 	if err != nil {
 		return nil, err
@@ -175,13 +175,13 @@ func (s *Store) GetEventsByNeighborhoodId(neighborhood_id int, dateTime time.Tim
 	return events, nil
 }
 
-func (s *Store) GetNeighborhoodEventsOnDate(neighborhood_id int, dateTime time.Time) ([]types.EventAddresses, error) {
+func (s *Store) GetNeighborhoodEventsOnDate(neighborhoodId int, dateTime time.Time) ([]types.EventAddresses, error) {
 	rows, err := s.db.Query(
 		`SELECT * FROM events e 
 		LEFT OUTER JOIN addresses a ON a.id = e.address_id
 		WHERE a.neighborhood_id = $1
 		AND start = $2
-		ORDER BY start`, neighborhood_id, dateTime,
+		ORDER BY start`, neighborhoodId, dateTime,
 	)
 	if err != nil {
 		return nil, err
@@ -199,13 +199,13 @@ func (s *Store) GetNeighborhoodEventsOnDate(neighborhood_id int, dateTime time.T
 	return events, nil
 }
 
-func (s *Store) GetNeighborhoodEventsBeforeDate(neighborhood_id int, dateTime time.Time) ([]types.EventAddresses, error) {
+func (s *Store) GetNeighborhoodEventsBeforeDate(neighborhoodId int, dateTime time.Time) ([]types.EventAddresses, error) {
 	rows, err := s.db.Query(
 		`SELECT * FROM events e 
 		LEFT OUTER JOIN addresses a ON a.id = e.address_id
 		WHERE a.neighborhood_id = $1
 		AND start < $2
-		ORDER BY start DESC`, neighborhood_id, dateTime,
+		ORDER BY start DESC`, neighborhoodId, dateTime,
 	)
 	if err != nil {
 		return nil, err
@@ -223,13 +223,13 @@ func (s *Store) GetNeighborhoodEventsBeforeDate(neighborhood_id int, dateTime ti
 	return events, nil
 }
 
-func (s *Store) GetNeighborhoodEventsAfterDate(neighborhood_id int, dateTime time.Time) ([]types.EventAddresses, error) {
+func (s *Store) GetNeighborhoodEventsAfterDate(neighborhoodId int, dateTime time.Time) ([]types.EventAddresses, error) {
 	rows, err := s.db.Query(
 		`SELECT * FROM events e 
 		LEFT OUTER JOIN addresses a ON a.id = e.address_id
 		WHERE a.neighborhood_id = $1
 		AND start > $2
-		ORDER BY start`, neighborhood_id, dateTime,
+		ORDER BY start`, neighborhoodId, dateTime,
 	)
 	if err != nil {
 		return nil, err

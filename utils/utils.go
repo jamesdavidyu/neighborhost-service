@@ -1,10 +1,11 @@
 /*
 1. GENERAL
 2. FOR ZIPCODE CONTROLLERS
-3. FOR NEIGHBORS CONTROLLERS
+3. FOR NEIGHBORS CONTROLLERS/SERVICES
 4. FOR ADDRESSES CONTROLLERS
 5. FOR NEIGHBORHOODS CONTROLLERS
 6. FOR EVENT CONTROLLERS
+7. FOR FRIENDS CONTROLLERS
 */
 
 package utils
@@ -211,4 +212,69 @@ func ScanRowIntoNeighborEvents(rows *sql.Rows) (*types.EventAddresses, error) {
 	}
 
 	return events, nil
+}
+
+/* 7. FOR FRIENDS CONTROLLERS */
+
+func ScanRowIntoFriends(rows *sql.Rows) (*types.Friends, error) {
+	friends := new(types.Friends)
+
+	err := rows.Scan(
+		&friends.Id,
+		&friends.NeighborId,
+		&friends.NeighborsFriendId,
+		&friends.FriendedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return friends, nil
+}
+
+func ScanRowIntoFriendRequests(rows *sql.Rows) (*types.FriendRequests, error) {
+	friends := new(types.FriendRequests)
+
+	err := rows.Scan(
+		&friends.Id,
+		&friends.NeighborId,
+		&friends.RequestingFriendId,
+		&friends.Status,
+		&friends.FriendRequestedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return friends, nil
+}
+
+/* FOR PROFILES CONTROLLERS */
+
+func ScanRowIntoProfiles(rows *sql.Rows) (*types.Profiles, error) {
+	profiles := new(types.Profiles)
+
+	err := rows.Scan(
+		&profiles.NeighborId,
+		&profiles.Bio,
+		&profiles.DateOfBirth,
+		&profiles.DateOfBirthPublic,
+		&profiles.Gender,
+		&profiles.GenderPublic,
+		&profiles.Race,
+		&profiles.RacePublic,
+		&profiles.Ethnicity,
+		&profiles.EthnicityPublic,
+		&profiles.RelationshipStatus,
+		&profiles.RelationshipStatusPublic,
+		&profiles.Religion,
+		&profiles.ReligionPublic,
+		&profiles.Politics,
+		&profiles.PoliticsPublic,
+	) // if querying for education, occupation, and interest separately, keep profile information separate?
+	if err != nil {
+		return nil, err
+	}
+
+	return profiles, nil
 }
