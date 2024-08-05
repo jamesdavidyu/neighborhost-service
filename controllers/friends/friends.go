@@ -15,18 +15,20 @@ func NewStore(db *sql.DB) *Store {
 	return &Store{db: db}
 }
 
-func (s *Store) GetFriendsByNeighborId(neighborId int) ([]types.Friends, error) {
+func (s *Store) GetFriendsByNeighborId(neighborId int) ([]types.FriendsList, error) {
 	rows, err := s.db.Query(
-		`SELECT * FROM friends
-		WHERE neighbor_id = $1`, neighborId,
+		`SELECT * FROM friends f
+		JOIN neighbors n ON n.id = f.neighbor_id
+		JOIN addresses a ON a.neighbor_id = f.neighbor_id
+		WHERE f.neighbor_id = $1`, neighborId,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	friends := make([]types.Friends, 0)
+	friends := make([]types.FriendsList, 0)
 	for rows.Next() {
-		friend, err := utils.ScanRowIntoFriends(rows)
+		friend, err := utils.ScanRowIntoFriendsList(rows)
 		if err != nil {
 			return nil, err
 		}

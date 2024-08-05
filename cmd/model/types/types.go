@@ -53,7 +53,7 @@ type EventStore interface {
 }
 
 type FriendStore interface {
-	GetFriendsByNeighborId(neighborId int) ([]Friends, error)
+	GetFriendsByNeighborId(neighborId int) ([]FriendsList, error)
 	GetFriendRequestsByNeighborId(requestedFriendId int) ([]PendingFriendRequests, error)
 	CreateFriendRequest(FriendRequests) error
 	UpdateFriendRequest(FriendRequests) error
@@ -335,6 +335,33 @@ type Friends struct {
 	NeighborId        int       `json:"neighborId"`
 	NeighborsFriendId int       `json:"neighborsFriendId"`
 	FriendedAt        time.Time `json:"friendedAt"`
+}
+
+type FriendsList struct {
+	Id                     int       `json:"id"`
+	NeighborId             int       `json:"neighborId"`
+	NeighborsFriendId      int       `json:"neighborsFriendId"`
+	FriendedAt             time.Time `json:"friendedAt"`
+	NeighborsId            int       `json:"neighborsId"`
+	Email                  string    `json:"email"`
+	Username               string    `json:"username"`
+	NeighborZipcode        string    `json:"neighborZipcode"`
+	Password               string    `json:"-"`
+	Verified               bool      `json:"verified"`
+	Ip                     string    `json:"ip"`
+	NeighborNeighborhoodId int       `json:"neighborNeighborhoodId"`
+	CreatedAt              time.Time `json:"createdAt"`
+	AddressesId            int       `json:"addressesId"`
+	FirstName              string    `json:"firstName"`
+	LastName               string    `json:"lastName"`
+	Address                string    `json:"address"`
+	City                   string    `json:"city"`
+	State                  string    `json:"state"`
+	Zipcode                string    `json:"zipcode"`
+	Type                   string    `json:"type"`
+	AddressesNeighborId    int       `json:"addressesNeighborId"`
+	NeighborhoodId         int       `json:"neighborhoodId"`
+	RecordedAt             time.Time `json:"recordedAt"`
 }
 
 type FriendRequests struct {

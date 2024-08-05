@@ -216,14 +216,34 @@ func ScanRowIntoNeighborEvents(rows *sql.Rows) (*types.EventAddresses, error) {
 
 /* 7. FOR FRIENDS CONTROLLERS */
 
-func ScanRowIntoFriends(rows *sql.Rows) (*types.Friends, error) {
-	friends := new(types.Friends)
+func ScanRowIntoFriendsList(rows *sql.Rows) (*types.FriendsList, error) {
+	friends := new(types.FriendsList)
 
 	err := rows.Scan(
 		&friends.Id,
 		&friends.NeighborId,
 		&friends.NeighborsFriendId,
 		&friends.FriendedAt,
+		&friends.NeighborsId,
+		&friends.Email,
+		&friends.Username,
+		&friends.NeighborZipcode,
+		&friends.Password,
+		&friends.Verified,
+		&friends.Ip,
+		&friends.NeighborNeighborhoodId,
+		&friends.CreatedAt,
+		&friends.AddressesId,
+		&friends.FirstName,
+		&friends.LastName,
+		&friends.Address,
+		&friends.City,
+		&friends.State,
+		&friends.Zipcode,
+		&friends.Type,
+		&friends.AddressesNeighborId,
+		&friends.NeighborhoodId,
+		&friends.RecordedAt,
 	)
 	if err != nil {
 		return nil, err

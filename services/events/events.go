@@ -27,7 +27,7 @@ func NewHandler(store types.EventStore, neighborStore types.NeighborStore, zipco
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/events", h.handleGetPublicEvents).Methods("GET")
 	router.HandleFunc("/events/auth", auth.WithJWTAuth(h.handleGetZipcodeEvents, h.neighborStore)).Methods("GET")
-	router.HandleFunc("/events/location-filter/auth", auth.WithJWTAuth(h.handleEventsWithLocation, h.neighborStore)).Methods("POST")
+	router.HandleFunc("/events/location-filter/auth", auth.WithJWTAuth(h.handleEventsWithLocation, h.neighborStore)).Methods("POST") // need to figure out how null filters look before writing this endpoint?
 	router.HandleFunc("/events/date-filter/auth", auth.WithJWTAuth(h.handleZipcodeEventsWithDate, h.neighborStore)).Methods("POST")
 	router.HandleFunc("/events/location-date-filter/auth", auth.WithJWTAuth(h.handleLocationEventsWithDate, h.neighborStore)).Methods("POST")
 	router.HandleFunc("/events/create-event/auth", auth.WithJWTAuth(h.handleCreateEvent, h.neighborStore)).Methods("POST")
