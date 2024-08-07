@@ -92,7 +92,7 @@ func (s *Store) GetAddressByNeighborId(id int) (*types.Addresses, error) {
 	rows, err := s.db.Query(
 		`SELECT * FROM addresses
 		WHERE neighbor_id = $1
-		AND type = "Home"`, id,
+		AND type = 'Home'`, id,
 	)
 	if err != nil {
 		return nil, err
