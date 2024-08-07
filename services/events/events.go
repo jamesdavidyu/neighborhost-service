@@ -45,6 +45,7 @@ func (h *Handler) handleGetPublicEvents(w http.ResponseWriter, r *http.Request) 
 
 func (h *Handler) handleGetZipcodeEvents(w http.ResponseWriter, r *http.Request) {
 	neighborId := auth.GetNeighborIdFromContext(r.Context())
+	var eventFilters types.EventFilterPayload
 
 	getNeighbor, err := h.neighborStore.GetNeighborById(neighborId)
 	if err != nil {
@@ -64,13 +65,31 @@ func (h *Handler) handleGetZipcodeEvents(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	events, err := h.store.GetEventsByZipcode(getNeighbor.Zipcode, time.Now().In(location))
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, err)
-		return
+	qs := r.URL.Query()
+	eventFilters.LocationFilter = utils.ReadString(qs, "location-filter", "My zipcode")
+	eventFilters.DateFilter = utils.ReadString(qs, "date-filter", "") // default is on after depending on how client makes request
+	eventFilters.DateTime = utils.ReadDateTime(qs, "datetime", time.Now().In(location))
+	// build out controllers
+
+	if eventFilters.LocationFilter == "My zipcode" {
+		events, err := h.store.GetEventsByZipcode(getNeighbor.Zipcode, time.Now().In(location))
+		if err != nil {
+			utils.WriteError(w, http.StatusInternalServerError, err)
+			return
+		}
+
+		utils.WriteJSON(w, http.StatusOK, events)
+
+	} else if eventFilters.LocationFilter == "My neighborhood" {
+		events, err := h.store.GetEventsByNeighborhoodId(getNeighbor.NeighborhoodId, time.Now().In(location))
+		if err != nil {
+			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+			return
+		}
+
+		utils.WriteJSON(w, http.StatusOK, events)
 	}
 
-	utils.WriteJSON(w, http.StatusOK, events)
 }
 
 func (h *Handler) handleZipcodeEventsWithDate(w http.ResponseWriter, r *http.Request) {
@@ -176,13 +195,6 @@ func (h *Handler) handleEventsWithLocation(w http.ResponseWriter, r *http.Reques
 		h.handleGetZipcodeEvents(w, r)
 
 	} else if locationFilter.LocationFilter == "My neighborhood" {
-		events, err := h.store.GetEventsByNeighborhoodId(getNeighbor.NeighborhoodId, time.Now().In(location))
-		if err != nil {
-			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
-			return
-		}
-
-		utils.WriteJSON(w, http.StatusOK, events)
 
 	} else if locationFilter.LocationFilter == "My city" {
 		getAddress, err := h.addressStore.GetAddressByNeighborId(neighborId) // this will need to get fixed to specify home address

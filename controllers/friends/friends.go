@@ -20,7 +20,8 @@ func (s *Store) GetFriendsByNeighborId(neighborId int) ([]types.FriendsList, err
 		`SELECT * FROM friends f
 		JOIN neighbors n ON n.id = f.neighbor_id
 		JOIN addresses a ON a.neighbor_id = f.neighbor_id
-		WHERE f.neighbor_id = $1`, neighborId,
+		WHERE f.neighbor_id = $1
+		ORDER BY a.first_name`, neighborId,
 	)
 	if err != nil {
 		return nil, err
@@ -62,7 +63,8 @@ func (s *Store) GetFriendRequestsByNeighborId(requestedFriendId int) ([]types.Pe
 		`SELECT * FROM friend_requests f
 		JOIN neighbors n ON n.id = f.requested_friend_id
 		WHERE f.requested_friend_id = $1
-		AND f.status = 'pending'`, requestedFriendId,
+		AND f.status = 'pending'
+		ORDER BY n.username`, requestedFriendId,
 	)
 	if err != nil {
 		return nil, err

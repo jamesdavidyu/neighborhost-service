@@ -297,6 +297,12 @@ type LocationDateFilterPayload struct {
 	DateTime       time.Time `json:"dateTime"`
 }
 
+type EventFilterPayload struct {
+	LocationFilter string    `json:"locationFilter"`
+	DateFilter     string    `json:"dateFilter"`
+	DateTime       time.Time `json:"dateTime"`
+}
+
 type EventAddresses struct {
 	Id               int       `json:"id"`
 	Name             string    `json:"name"`

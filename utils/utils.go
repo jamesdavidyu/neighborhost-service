@@ -16,6 +16,10 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jamesdavidyu/neighborhost-service/cmd/model/types"
@@ -56,6 +60,54 @@ func WriteJSON(w http.ResponseWriter, status int, v any) error {
 
 func WriteError(w http.ResponseWriter, status int, err error) {
 	WriteJSON(w, status, map[string]string{"error": err.Error()})
+}
+
+func ReadString(qs url.Values, key string, defaultValue string) string {
+	value := qs.Get(key)
+	if value == "" {
+		return defaultValue
+	}
+
+	return value
+}
+
+func ReadCSV(qs url.Values, key string, defaultValue []string) []string {
+	value := qs.Get(key)
+	if value == "" {
+		return defaultValue
+	}
+
+	return strings.Split(value, ",")
+}
+
+func ReadInt(qs url.Values, key string, defaultValue int) int {
+	value := qs.Get(key)
+	if value == "" {
+		return defaultValue
+	}
+
+	intValue, err := strconv.Atoi(value)
+	if err != nil {
+		return defaultValue
+	}
+
+	return intValue
+}
+
+func ReadDateTime(qs url.Values, key string, defaultValue time.Time) time.Time {
+	value := qs.Get(key)
+	if value == "" {
+		return defaultValue
+	}
+
+	layout := "2006-01-02 15:04:05"
+
+	dateTimeValue, err := time.Parse(layout, value)
+	if err != nil {
+		return defaultValue
+	}
+
+	return dateTimeValue
 }
 
 /* 2. FOR ZIPCODES CONTROLLERS */
