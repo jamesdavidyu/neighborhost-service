@@ -6,6 +6,7 @@ import (
 
 type ZipcodeStore interface {
 	GetZipcodeData(zipcode string) (*Zipcodes, error)
+	GetZipcodeWithCityStateZipcode(cityStateZipcode string) (*Zipcodes, error)
 	ValidateZipcode(city string, state string, zipcode string) (*Zipcodes, error)
 }
 

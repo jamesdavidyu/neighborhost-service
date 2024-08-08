@@ -35,6 +35,26 @@ func (s *Store) GetZipcodeData(zipcode string) (*types.Zipcodes, error) {
 	return zipcodeData, nil
 }
 
+func (s *Store) GetZipcodeWithCityStateZipcode(cityStateZipcode string) (*types.Zipcodes, error) {
+	rows, err := s.db.Query(
+		`SELECT * FROM zipcodes
+		WHERE city||', '||state||' '||zipcode = $1`, cityStateZipcode,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	zipcodeData := new(types.Zipcodes)
+	for rows.Next() {
+		zipcodeData, err = utils.ScanRowIntoZipcodes(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return zipcodeData, nil
+}
+
 func (s *Store) ValidateZipcode(city string, state string, zipcode string) (*types.Zipcodes, error) {
 	rows, err := s.db.Query(
 		`SELECT * FROM zipcodes
