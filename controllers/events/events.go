@@ -31,7 +31,8 @@ func (s *Store) GetPublicEvents() ([]types.Events, error) {
 		`SELECT * FROM events
 		WHERE for_unloggedins = TRUE
 		AND start >= $1
-		ORDER BY start`, time.Now(),
+		ORDER BY start
+		LIMIT 10`, time.Now(), // AB test to figure out optimal limit number
 	)
 	if err != nil {
 		return nil, err

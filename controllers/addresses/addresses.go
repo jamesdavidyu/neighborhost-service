@@ -109,7 +109,7 @@ func (s *Store) GetAddressByNeighborId(id int) (*types.Addresses, error) {
 	return addresses, nil
 }
 
-func (s *Store) GetAddressesByNeighborId(id int) (*types.Addresses, error) {
+func (s *Store) GetAddressesByNeighborId(id int) ([]types.Addresses, error) {
 	rows, err := s.db.Query(
 		`SELECT * FROM addresses
 		WHERE neighbor_id = $1`, id,
@@ -118,12 +118,13 @@ func (s *Store) GetAddressesByNeighborId(id int) (*types.Addresses, error) {
 		return nil, err
 	}
 
-	addresses := new(types.Addresses)
+	addresses := make([]types.Addresses, 0)
 	for rows.Next() {
-		addresses, err = utils.ScanRowIntoAddresses(rows)
+		address, err := utils.ScanRowIntoAddresses(rows)
 		if err != nil {
 			return nil, err
 		}
+		addresses = append(addresses, *address)
 	}
 
 	return addresses, nil

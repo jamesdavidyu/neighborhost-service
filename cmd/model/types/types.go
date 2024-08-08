@@ -32,7 +32,7 @@ type AddressStore interface {
 		neighborId int,
 	) (*Addresses, error)
 	GetAddressByNeighborId(id int) (*Addresses, error)
-	GetAddressesByNeighborId(id int) (*Addresses, error)
+	GetAddressesByNeighborId(id int) ([]Addresses, error)
 }
 
 type EventStore interface {

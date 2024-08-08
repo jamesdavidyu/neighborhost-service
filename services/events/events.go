@@ -63,10 +63,9 @@ func (h *Handler) handleGetEvents(w http.ResponseWriter, r *http.Request) {
 	}
 
 	qs := r.URL.Query()
-	eventFilters.LocationFilter = utils.ReadString(qs, "location-filter", "My zipcode")
-	eventFilters.DateFilter = utils.ReadString(qs, "date-filter", "") // default is on after depending on how client makes request
+	eventFilters.LocationFilter = utils.ReadString(qs, "location", "My zipcode")
+	eventFilters.DateFilter = utils.ReadString(qs, "starts", "") // default is on after depending on how client makes request
 	eventFilters.DateTime = utils.ReadDateTime(qs, "datetime", time.Now().In(location))
-	// build out controllers
 
 	if eventFilters.LocationFilter == "My zipcode" {
 		if eventFilters.DateFilter == "On" {
