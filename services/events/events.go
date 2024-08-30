@@ -289,6 +289,7 @@ func (h *Handler) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// need to delete checking if address exists logic bc not letting users just upload any address
 	if checkAddress.Id == 0 {
 		getHomeAddress, err := h.addressStore.GetAddressByNeighborId(getNeighbor.Id)
 		if err != nil {
@@ -326,8 +327,8 @@ func (h *Handler) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 		}
 
 		err = h.store.CreateEvent(types.Events{
-			Name:           event.Name,
-			Description:    event.Description,
+			Name:           utils.ToProperCase(event.Name),
+			Description:    utils.ToProperCase(event.Description),
 			Start:          event.Start.In(location),
 			End:            event.End.In(location),
 			Reoccurrence:   event.Reoccurrence,
@@ -347,8 +348,8 @@ func (h *Handler) handleCreateEvent(w http.ResponseWriter, r *http.Request) {
 
 	} else {
 		err = h.store.CreateEvent(types.Events{
-			Name:           event.Name,
-			Description:    event.Description,
+			Name:           utils.ToProperCase(event.Name),
+			Description:    utils.ToProperCase(event.Description),
 			Start:          event.Start.In(location),
 			End:            event.End.In(location),
 			Reoccurrence:   event.Reoccurrence,

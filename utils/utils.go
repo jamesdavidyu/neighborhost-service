@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jamesdavidyu/neighborhost-service/cmd/model/types"
@@ -108,6 +109,19 @@ func ReadDateTime(qs url.Values, key string, defaultValue time.Time) time.Time {
 	}
 
 	return dateTimeValue
+}
+
+func ToProperCase(input string) string {
+	words := strings.Fields(input)
+	for i, word := range words {
+		runes := []rune(word)
+		if len(runes) > 0 {
+			runes[0] = unicode.ToUpper(runes[0])
+		}
+		words[i] = string(runes)
+	}
+
+	return strings.Join(words, " ")
 }
 
 /* 2. FOR ZIPCODES CONTROLLERS */
