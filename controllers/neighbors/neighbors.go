@@ -143,6 +143,20 @@ func (s *Store) UpdateZipcodeWithId(neighbor types.Neighbors) error {
 	return nil
 }
 
+func (s *Store) UpdateVerifiedWithId(neighbor types.Neighbors) error {
+	_, err := s.db.Exec(
+		`UPDATE neighbors
+		SET verified = $1
+		WHERE id = $2`,
+		neighbor.Verified, neighbor.Id,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *Store) UpdatePasswordWithId(neighbor types.Neighbors) error {
 	_, err := s.db.Exec(
 		`UPDATE neighbors

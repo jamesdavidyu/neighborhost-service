@@ -18,6 +18,7 @@ type NeighborStore interface {
 	GetNeighborWithUsername(username string) (*Neighbors, error)
 	UpdateZipcodeWithId(Neighbors) error
 	UpdatePasswordWithId(Neighbors) error
+	UpdateVerifiedWithId(Neighbors) error
 }
 
 type AddressStore interface {
