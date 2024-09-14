@@ -192,7 +192,7 @@ func (h *Handler) handleGetEvents(w http.ResponseWriter, r *http.Request) {
 
 		}
 
-	} else if eventFilters.LocationFilter != "my_zipcode" || eventFilters.LocationFilter != "my_neighborhood" || eventFilters.LocationFilter != "My city" {
+	} else if eventFilters.LocationFilter != "my_neighborhood" || eventFilters.LocationFilter != "my_city" {
 		getLocation, err := h.zipcodeStore.GetZipcodeWithCityStateZipcode(eventFilters.LocationFilter)
 		if err != nil {
 			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
@@ -227,9 +227,9 @@ func (h *Handler) handleGetEvents(w http.ResponseWriter, r *http.Request) {
 			utils.WriteJSON(w, http.StatusOK, events)
 
 		} else {
-			events, err := h.store.GetEventsByCity(getLocation.City, getLocation.State, getLocation.Zipcode, time.Now().In(location))
+			events, err := h.store.GetEventsByZipcode(getNeighbor.Zipcode, time.Now().In(location))
 			if err != nil {
-				utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+				utils.WriteError(w, http.StatusInternalServerError, err)
 				return
 			}
 
