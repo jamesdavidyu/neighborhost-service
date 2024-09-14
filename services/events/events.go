@@ -67,8 +67,8 @@ func (h *Handler) handleGetEvents(w http.ResponseWriter, r *http.Request) {
 	eventFilters.DateFilter = utils.ReadString(qs, "starts", "") // default is on after depending on how client makes request
 	eventFilters.DateTime = utils.ReadDateTime(qs, "datetime", time.Now().In(location))
 
-	if eventFilters.LocationFilter == "My zipcode" {
-		if eventFilters.DateFilter == "On" {
+	if eventFilters.LocationFilter == "my_zipcode" {
+		if eventFilters.DateFilter == "on" {
 			events, err := h.store.GetZipcodeEventsOnDate(getNeighbor.Zipcode, eventFilters.DateTime.In(location))
 			if err != nil {
 				utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
@@ -77,7 +77,7 @@ func (h *Handler) handleGetEvents(w http.ResponseWriter, r *http.Request) {
 
 			utils.WriteJSON(w, http.StatusOK, events)
 
-		} else if eventFilters.DateFilter == "Before" {
+		} else if eventFilters.DateFilter == "before" {
 			events, err := h.store.GetZipcodeEventsBeforeDate(getNeighbor.Zipcode, eventFilters.DateTime.In(location))
 			if err != nil {
 				utils.WriteError(w, http.StatusInternalServerError, err)
@@ -86,7 +86,7 @@ func (h *Handler) handleGetEvents(w http.ResponseWriter, r *http.Request) {
 
 			utils.WriteJSON(w, http.StatusOK, events)
 
-		} else if eventFilters.DateFilter == "After" {
+		} else if eventFilters.DateFilter == "after" {
 			events, err := h.store.GetZipcodeEventsAfterDate(getNeighbor.Zipcode, eventFilters.DateTime.In(location))
 			if err != nil {
 				utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
@@ -108,8 +108,8 @@ func (h *Handler) handleGetEvents(w http.ResponseWriter, r *http.Request) {
 
 		}
 
-	} else if eventFilters.LocationFilter == "My neighborhood" {
-		if eventFilters.DateFilter == "On" {
+	} else if eventFilters.LocationFilter == "my_neighborhood" {
+		if eventFilters.DateFilter == "on" {
 			events, err := h.store.GetNeighborhoodEventsOnDate(getNeighbor.NeighborhoodId, eventFilters.DateTime.In(location))
 			if err != nil {
 				utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
@@ -118,7 +118,7 @@ func (h *Handler) handleGetEvents(w http.ResponseWriter, r *http.Request) {
 
 			utils.WriteJSON(w, http.StatusOK, events)
 
-		} else if eventFilters.DateFilter == "Before" {
+		} else if eventFilters.DateFilter == "before" {
 			events, err := h.store.GetNeighborhoodEventsBeforeDate(getNeighbor.NeighborhoodId, eventFilters.DateTime.In(location))
 			if err != nil {
 				utils.WriteError(w, http.StatusInternalServerError, err)
@@ -127,7 +127,7 @@ func (h *Handler) handleGetEvents(w http.ResponseWriter, r *http.Request) {
 
 			utils.WriteJSON(w, http.StatusOK, events)
 
-		} else if eventFilters.DateFilter == "After" {
+		} else if eventFilters.DateFilter == "after" {
 			events, err := h.store.GetNeighborhoodEventsAfterDate(getNeighbor.NeighborhoodId, eventFilters.DateTime.In(location))
 			if err != nil {
 				utils.WriteError(w, http.StatusInternalServerError, err)
@@ -147,14 +147,14 @@ func (h *Handler) handleGetEvents(w http.ResponseWriter, r *http.Request) {
 
 		}
 
-	} else if eventFilters.LocationFilter == "My city" {
+	} else if eventFilters.LocationFilter == "my_city" {
 		getAddress, err := h.addressStore.GetAddressByNeighborId(neighborId) // temp, need to redo zipcode table to include state abbr or just figure out making filterable zipcode service and need to know how requests come through
 		if err != nil {
 			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 			return
 		}
 
-		if eventFilters.DateFilter == "On" {
+		if eventFilters.DateFilter == "on" {
 			events, err := h.store.GetCityEventsOnDate(getAddress.City, getAddress.State, getAddress.Zipcode, eventFilters.DateTime.In(location))
 			if err != nil {
 				utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
@@ -163,7 +163,7 @@ func (h *Handler) handleGetEvents(w http.ResponseWriter, r *http.Request) {
 
 			utils.WriteJSON(w, http.StatusOK, events)
 
-		} else if eventFilters.DateFilter == "Before" {
+		} else if eventFilters.DateFilter == "before" {
 			events, err := h.store.GetCityEventsBeforeDate(getAddress.City, getAddress.State, getAddress.Zipcode, eventFilters.DateTime.In(location))
 			if err != nil {
 				utils.WriteError(w, http.StatusInternalServerError, err)
@@ -172,7 +172,7 @@ func (h *Handler) handleGetEvents(w http.ResponseWriter, r *http.Request) {
 
 			utils.WriteJSON(w, http.StatusOK, events)
 
-		} else if eventFilters.DateFilter == "After" {
+		} else if eventFilters.DateFilter == "after" {
 			events, err := h.store.GetCityEventsAfterDate(getAddress.City, getAddress.State, getAddress.Zipcode, eventFilters.DateTime.In(location))
 			if err != nil {
 				utils.WriteError(w, http.StatusInternalServerError, err)
@@ -192,14 +192,14 @@ func (h *Handler) handleGetEvents(w http.ResponseWriter, r *http.Request) {
 
 		}
 
-	} else if eventFilters.LocationFilter != "My zipcode" || eventFilters.LocationFilter != "My neighborhood" || eventFilters.LocationFilter != "My city" {
+	} else if eventFilters.LocationFilter != "my_zipcode" || eventFilters.LocationFilter != "my_neighborhood" || eventFilters.LocationFilter != "My city" {
 		getLocation, err := h.zipcodeStore.GetZipcodeWithCityStateZipcode(eventFilters.LocationFilter)
 		if err != nil {
 			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
 			return
 		}
 
-		if eventFilters.DateFilter == "On" {
+		if eventFilters.DateFilter == "on" {
 			events, err := h.store.GetCityEventsOnDate(getLocation.City, getLocation.State, getLocation.Zipcode, eventFilters.DateTime.In(location))
 			if err != nil {
 				utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
@@ -208,7 +208,7 @@ func (h *Handler) handleGetEvents(w http.ResponseWriter, r *http.Request) {
 
 			utils.WriteJSON(w, http.StatusOK, events)
 
-		} else if eventFilters.DateFilter == "Before" {
+		} else if eventFilters.DateFilter == "before" {
 			events, err := h.store.GetCityEventsBeforeDate(getLocation.City, getLocation.State, getLocation.Zipcode, eventFilters.DateTime.In(location))
 			if err != nil {
 				utils.WriteError(w, http.StatusInternalServerError, err)
@@ -217,7 +217,7 @@ func (h *Handler) handleGetEvents(w http.ResponseWriter, r *http.Request) {
 
 			utils.WriteJSON(w, http.StatusOK, events)
 
-		} else if eventFilters.DateFilter == "After" {
+		} else if eventFilters.DateFilter == "after" {
 			events, err := h.store.GetCityEventsAfterDate(getLocation.City, getLocation.State, getLocation.Zipcode, eventFilters.DateTime.In(location))
 			if err != nil {
 				utils.WriteError(w, http.StatusInternalServerError, err)
