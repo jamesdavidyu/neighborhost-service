@@ -182,9 +182,9 @@ func (h *Handler) handleGetEvents(w http.ResponseWriter, r *http.Request) {
 			utils.WriteJSON(w, http.StatusOK, events)
 
 		} else {
-			events, err := h.store.GetEventsByCity(getAddress.City, getAddress.State, getAddress.Zipcode, time.Now().In(location))
+			events, err := h.store.GetEventsByCity(getAddress.City, getAddress.State, time.Now().In(location))
 			if err != nil {
-				utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("database error"))
+				utils.WriteError(w, http.StatusInternalServerError, err)
 				return
 			}
 

@@ -250,13 +250,13 @@ func (s *Store) GetNeighborhoodEventsAfterDate(neighborhoodId int, dateTime time
 
 /* 4. CITY */
 
-func (s *Store) GetEventsByCity(city string, state string, zipcode string, dateTime time.Time) ([]types.EventAddresses, error) {
+func (s *Store) GetEventsByCity(city string, state string, dateTime time.Time) ([]types.EventAddresses, error) {
 	rows, err := s.db.Query(
 		`SELECT * FROM events e
 		LEFT OUTER JOIN addresses a ON a.id = e.address_id
-		WHERE a.city = $1 AND a.state = $2 AND a.zipcode = $3
-		AND start >= $4
-		ORDER BY start`, city, state, zipcode, dateTime,
+		WHERE a.city = $1 AND a.state = $2
+		AND start >= $3
+		ORDER BY start`, city, state, dateTime,
 	)
 	if err != nil {
 		return nil, err

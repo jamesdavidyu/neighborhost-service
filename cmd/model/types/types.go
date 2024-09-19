@@ -46,7 +46,7 @@ type EventStore interface {
 	GetNeighborhoodEventsOnDate(neighborhoodId int, dateTime time.Time) ([]EventAddresses, error)
 	GetNeighborhoodEventsBeforeDate(neighborhoodId int, dateTime time.Time) ([]EventAddresses, error)
 	GetNeighborhoodEventsAfterDate(neighborhoodId int, dateTime time.Time) ([]EventAddresses, error)
-	GetEventsByCity(city string, state string, zipcode string, dateTime time.Time) ([]EventAddresses, error)
+	GetEventsByCity(city string, state string, dateTime time.Time) ([]EventAddresses, error)
 	GetCityEventsOnDate(city string, state string, zipcode string, dateTime time.Time) ([]EventAddresses, error)
 	GetCityEventsBeforeDate(city string, state string, zipcode string, dateTime time.Time) ([]EventAddresses, error)
 	GetCityEventsAfterDate(city string, state string, zipcode string, dateTime time.Time) ([]EventAddresses, error)
