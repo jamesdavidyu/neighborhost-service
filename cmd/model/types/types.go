@@ -71,6 +71,7 @@ type NeighborhoodStore interface {
 	CreateNeighborhood(Neighborhoods) error
 }
 
+// TODO: need to add state abbreviations to table
 type Zipcodes struct {
 	Zipcode  string `json:"zipcode"`
 	City     string `json:"city"`
@@ -94,7 +95,7 @@ type Neighbors struct {
 	Ip             string    `json:"ip"`
 	NeighborhoodId int       `json:"neighborhoodId"`
 	CreatedAt      time.Time `json:"createdAt"`
-	// role
+	// TODO: role
 }
 
 type Register struct {
@@ -396,3 +397,5 @@ type PendingFriendRequests struct {
 	NeighborhoodId    int       `json:"neighborhoodId"`
 	CreatedAt         time.Time `json:"createdAt"`
 }
+
+// TODO: notifications table
